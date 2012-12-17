@@ -9,12 +9,16 @@ import java.io.File;
 class Compositor extends org.freedesktop.wayland.server.protocol.Compositor
 {
     Display display;
+    Shm shm;
 
     public Compositor()
     {
         super(0);
         display = new Display();
         display.addGlobal(this);
+        shm = new Shm();
+        display.addGlobal(shm);
+        shm.publishFormats();
 
         File simple_shm = new File("/data/local/tmp", "simple-shm");
         String[] args = {
