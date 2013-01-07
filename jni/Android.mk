@@ -1,7 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 
 WAYLAND_APP_SRC := \
-	src/shm_buffer.c
+	src/shm_pool.c
 
 include $(CLEAR_VARS)
 

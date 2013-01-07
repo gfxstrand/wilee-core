@@ -3,42 +3,55 @@ package net.jlekstrand.wayland;
 import java.nio.ByteBuffer;
 
 import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Resource;
+import org.freedesktop.wayland.server.protocol.wl_shm_pool;
 
 class ShmBuffer extends Buffer
 {
-    private final int width;
-    private final int height;
+    private final int offset;
     private final int stride;
     private final int format;
 
-    private ByteBuffer buffer;
+    private final ShmPool pool;
 
-	public ShmBuffer(int id, int fd, int offset, int width, int height,
+	public ShmBuffer(int id, ShmPool pool, int offset, int width, int height,
             int stride, int format)
     {
-        super(id);
-        this.width = width;
-        this.height = height;
+        super(id, width, height);
+
+        this.offset = offset;
         this.stride = stride;
         this.format = format;
+        this.pool = pool;
+    }
 
-        this.buffer = map(fd, offset, width * stride);
+    public ByteBuffer getBuffer()
+    {
+        ByteBuffer buffer = pool.getBuffer();
+        if (buffer != null) {
+            buffer.position(offset);
+            ByteBuffer slice = buffer.slice();
+            slice.limit(height * stride);
+            return slice;
+        } else {
+            return null;
+        }
+    }
+
+    public int getStride()
+    {
+        return stride;
+    }
+
+    public int getFormat()
+    {
+        return format;
     }
 
     @Override
     public void destroy(Client client)
     {
-        if (buffer != null) {
-            unmap(buffer);
-            buffer = null;
-        }
-    }
-
-    private static native ByteBuffer map(int fd, int offset, int size);
-    private static native void unmap(ByteBuffer buffer);
-
-    static {
-        System.loadLibrary("wayland-app");
+        super.destroy(client);
     }
 }
 

@@ -1,10 +1,29 @@
 package net.jlekstrand.wayland;
 
-class Buffer extends org.freedesktop.wayland.server.protocol.Buffer
+import org.freedesktop.wayland.server.Resource;
+import org.freedesktop.wayland.server.protocol.wl_buffer;
+
+class Buffer extends Resource implements wl_buffer.Requests
 {
-    public Buffer(int id)
+    protected final int width;
+    protected final int height;
+
+    public Buffer(int id, int width, int height)
     {
-        super(id);
+        super(wl_buffer.WAYLAND_INTERFACE, id);
+
+        this.width = width;
+        this.height = height;
+    }
+
+    public int getWidth()
+    {
+        return width;
+    }
+
+    public int getHeight()
+    {
+        return height;
     }
 }
 

@@ -12,6 +12,13 @@ public class WaylandActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        /*
+        try {
+            Thread.sleep(7 * 1000);
+        } catch (InterruptedException e) {
+        }
+        */
+
         final Compositor comp = new Compositor();
 
         new Thread(new Runnable() {

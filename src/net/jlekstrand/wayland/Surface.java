@@ -1,40 +1,50 @@
 package net.jlekstrand.wayland;
 
 import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.protocol.Region;
-import org.freedesktop.wayland.server.protocol.Buffer;
+import org.freedesktop.wayland.server.Resource;
 
-class Surface extends org.freedesktop.wayland.server.protocol.Surface
+import org.freedesktop.wayland.server.protocol.wl_surface;
+import org.freedesktop.wayland.server.protocol.wl_region;
+import org.freedesktop.wayland.server.protocol.wl_buffer;
+
+class Surface extends Resource implements wl_surface.Requests
 {
     public Surface(int id)
     {
-        super(id);
+        super(wl_surface.WAYLAND_INTERFACE, id);
     }
 
-	public void attach(Client client, Buffer buffer, int x, int y)
+    @Override
+	public void attach(Client client, wl_buffer buffer, int x, int y)
     {
     }
 
+    @Override
 	public void damage(Client client, int x, int y, int width, int height)
     {
     }
 
+    @Override
 	public void frame(Client client, int callback)
     {
     }
 
-	public void setOpaqueRegion(Client client, Region region)
+    @Override
+	public void setOpaqueRegion(Client client, wl_region region)
     {
     }
 
-	public void setInputRegion(Client client, Region region)
+    @Override
+	public void setInputRegion(Client client, wl_region region)
     {
     }
 
+    @Override
 	public void commit(Client client)
     {
     }
 
+    @Override
 	public void setBufferTransform(Client client, int transform)
     {
     }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="wayland-java-custom" default="help">
+    <target name="-pre-build">
+        <exec executable="ndk-build" failonerror="true"/>
+    </target>
+</project>
+
