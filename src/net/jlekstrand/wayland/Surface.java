@@ -9,13 +9,21 @@ import org.freedesktop.wayland.server.protocol.wl_buffer;
 
 class Surface extends Resource implements wl_surface.Requests
 {
+    Buffer currentBuffer;
+
     public Surface(int id)
     {
         super(wl_surface.WAYLAND_INTERFACE, id);
     }
 
     @Override
-	public void attach(Client client, wl_buffer buffer, int x, int y)
+	public void destroy(Client client)
+    {
+        super.destroy();
+    }
+
+    @Override
+	public void attach(Client client, wl_buffer.Requests buffer, int x, int y)
     {
     }
 
@@ -30,12 +38,12 @@ class Surface extends Resource implements wl_surface.Requests
     }
 
     @Override
-	public void setOpaqueRegion(Client client, wl_region region)
+	public void setOpaqueRegion(Client client, wl_region.Requests region)
     {
     }
 
     @Override
-	public void setInputRegion(Client client, wl_region region)
+	public void setInputRegion(Client client, wl_region.Requests region)
     {
     }
 

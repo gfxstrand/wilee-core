@@ -1,6 +1,8 @@
 package net.jlekstrand.wayland;
 
+import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Resource;
+
 import org.freedesktop.wayland.server.protocol.wl_buffer;
 
 class Buffer extends Resource implements wl_buffer.Requests
@@ -14,6 +16,12 @@ class Buffer extends Resource implements wl_buffer.Requests
 
         this.width = width;
         this.height = height;
+    }
+
+    @Override
+	public void destroy(Client client)
+    {
+        super.destroy();
     }
 
     public int getWidth()

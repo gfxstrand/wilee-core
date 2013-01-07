@@ -17,6 +17,17 @@ class Region extends Resource implements wl_region.Requests
         androidRegion = new android.graphics.Region();
     }
 
+    android.graphics.Region getRegion()
+    {
+        return androidRegion;
+    }
+
+    @Override
+	public void destroy(Client client)
+    {
+        super.destroy();
+    }
+
     @Override
 	public void add(Client client, int x, int y, int width, int height)
     {

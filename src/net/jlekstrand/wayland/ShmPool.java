@@ -46,21 +46,21 @@ class ShmPool extends Resource implements wl_shm_pool.Requests
     }
 
     @Override
-	public void resize(Client client, int size)
-    {
-        // TODO: This should be implemented better
-        this.size = size;
-        this.buffer = map(fd, size);
-    }
-
-    @Override
     public void destroy(Client client)
     {
         if (buffer != null) {
             unmap(buffer);
             buffer = null;
         }
-        super.destroy(client);
+        super.destroy();
+    }
+
+    @Override
+	public void resize(Client client, int size)
+    {
+        // TODO: This should be implemented better
+        this.size = size;
+        this.buffer = map(fd, size);
     }
 
     private static native ByteBuffer map(int fd, int size);
