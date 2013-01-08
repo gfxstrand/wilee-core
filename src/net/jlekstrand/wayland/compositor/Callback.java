@@ -1,4 +1,4 @@
-package net.jlekstrand.wayland;
+package net.jlekstrand.wayland.compositor;
 
 import org.freedesktop.wayland.server.Resource;
 

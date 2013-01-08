@@ -3,6 +3,8 @@ package net.jlekstrand.wayland;
 import android.app.Activity;
 import android.os.Bundle;
 
+import net.jlekstrand.wayland.compositor.Compositor;
+
 public class WaylandActivity extends Activity
 {
     /** Called when the activity is first created. */

@@ -1,4 +1,4 @@
-package net.jlekstrand.wayland;
+package net.jlekstrand.wayland.compositor;
 
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.Display;
@@ -10,7 +10,7 @@ import org.freedesktop.wayland.server.protocol.wl_shm;
 
 import java.io.File;
 
-class Compositor implements Global.BindHandler, wl_compositor.Requests
+public class Compositor implements Global.BindHandler, wl_compositor.Requests
 {
     Display display;
     Shm shm;
