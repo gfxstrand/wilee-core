@@ -3,7 +3,7 @@ package net.jlekstrand.wayland.compositor;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Resource;
 
-import org.freedesktop.wayland.server.protocol.wl_region;
+import org.freedesktop.wayland.protocol.wl_region;
 
 import android.graphics.Rect;
 

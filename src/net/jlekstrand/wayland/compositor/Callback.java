@@ -2,7 +2,7 @@ package net.jlekstrand.wayland.compositor;
 
 import org.freedesktop.wayland.server.Resource;
 
-import org.freedesktop.wayland.server.protocol.wl_callback;
+import org.freedesktop.wayland.protocol.wl_callback;
 
 class Callback extends Resource implements wl_callback.Requests
 {

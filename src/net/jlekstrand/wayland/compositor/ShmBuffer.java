@@ -4,7 +4,8 @@ import java.nio.ByteBuffer;
 
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Resource;
-import org.freedesktop.wayland.server.protocol.wl_shm_pool;
+
+import org.freedesktop.wayland.protocol.wl_shm_pool;
 
 class ShmBuffer extends Buffer
 {

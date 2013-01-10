@@ -4,9 +4,9 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.server.Listener;
 
-import org.freedesktop.wayland.server.protocol.wl_surface;
-import org.freedesktop.wayland.server.protocol.wl_region;
-import org.freedesktop.wayland.server.protocol.wl_buffer;
+import org.freedesktop.wayland.protocol.wl_surface;
+import org.freedesktop.wayland.protocol.wl_region;
+import org.freedesktop.wayland.protocol.wl_buffer;
 
 import java.util.ArrayList;
 

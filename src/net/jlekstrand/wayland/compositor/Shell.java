@@ -3,8 +3,8 @@ package net.jlekstrand.wayland.compositor;
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.Client;
 
-import org.freedesktop.wayland.server.protocol.wl_shell;
-import org.freedesktop.wayland.server.protocol.wl_surface;
+import org.freedesktop.wayland.protocol.wl_shell;
+import org.freedesktop.wayland.protocol.wl_surface;
 
 class Shell implements Global.BindHandler, wl_shell.Requests
 {

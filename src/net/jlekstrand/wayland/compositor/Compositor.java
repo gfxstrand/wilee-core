@@ -5,8 +5,8 @@ import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.Client;
 
-import org.freedesktop.wayland.server.protocol.wl_compositor;
-import org.freedesktop.wayland.server.protocol.wl_shm;
+import org.freedesktop.wayland.protocol.wl_compositor;
+import org.freedesktop.wayland.protocol.wl_shm;
 
 import java.io.File;
 

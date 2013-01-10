@@ -6,7 +6,8 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Resource;
-import org.freedesktop.wayland.server.protocol.wl_shm;
+
+import org.freedesktop.wayland.protocol.wl_shm;
 
 class Shm implements Global.BindHandler, wl_shm.Requests
 {

@@ -3,10 +3,10 @@ package net.jlekstrand.wayland.compositor;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Resource;
 
-import org.freedesktop.wayland.server.protocol.wl_shell_surface;
-import org.freedesktop.wayland.server.protocol.wl_surface;
-import org.freedesktop.wayland.server.protocol.wl_seat;
-import org.freedesktop.wayland.server.protocol.wl_output;
+import org.freedesktop.wayland.protocol.wl_shell_surface;
+import org.freedesktop.wayland.protocol.wl_surface;
+import org.freedesktop.wayland.protocol.wl_seat;
+import org.freedesktop.wayland.protocol.wl_output;
 
 class ShellSurface extends Resource implements wl_shell_surface.Requests
 {
