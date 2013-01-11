@@ -1,9 +1,8 @@
 package net.jlekstrand.wayland.compositor;
 
-import android.view.Surface;
 import android.view.SurfaceHolder;
 
-class AbstractRenderer implements Renderer
+abstract class AbstractRenderer implements Renderer
 {
     private static abstract class SafeHandoffRunnable implements Runnable{
         boolean finished;
@@ -52,6 +51,8 @@ class AbstractRenderer implements Renderer
 
     QueuedExecutorThread renderThread;
 
+    protected abstract void onDrawSurface(Surface surface);
+
     protected void onRender(Shell shell)
     {
         return;
@@ -71,6 +72,23 @@ class AbstractRenderer implements Renderer
     protected void onSurfaceDestroyed(SurfaceHolder holder)
     {
         return;
+    }
+
+    @Override
+    public final void drawSurface(final Surface surface)
+    {
+        if (renderThread == null)
+            return;
+
+        SafeHandoffRunnable closure = new SafeHandoffRunnable() {
+            public void onRun()
+            {
+                onDrawSurface(surface);
+            }
+        };
+
+        renderThread.execute(closure);
+        closure.waitForHandoff();
     }
 
     @Override

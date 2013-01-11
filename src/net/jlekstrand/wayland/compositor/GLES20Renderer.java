@@ -126,7 +126,31 @@ public class GLES20Renderer extends AbstractRenderer
         GLES20.glClearColor(0, 0, 1, 1);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
+        GLES20.glUseProgram(program);
+
+        int vertexAttribLoc = GLES20.glGetAttribLocation(program, "va_vertex");
+
+        ByteBuffer vertices = ByteBuffer.allocateDirect(6 * 4);
+        vertices.order(ByteOrder.nativeOrder());
+        vertices.asFloatBuffer().put(new float[]{
+            0.0f, 0.5f,
+            -0.5f, -0.5f,
+            0.5f, -0.5f
+        });
+
+        GLES20.glEnableVertexAttribArray(vertexAttribLoc);
+        GLES20.glVertexAttribPointer(vertexAttribLoc, 2, GLES20.GL_FLOAT,
+                false, 0, vertices);
+
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+
         egl.eglSwapBuffers(display, surface);
+    }
+
+    @Override
+    protected void onDrawSurface(Surface surface)
+    {
+        return;
     }
 
     @Override
