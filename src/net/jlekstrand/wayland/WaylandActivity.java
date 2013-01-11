@@ -13,6 +13,7 @@ public class WaylandActivity extends Activity
 {
     SurfaceView sView;
     Renderer renderer;
+    Thread renderThread;
 
     /** Called when the activity is first created. */
     @Override
@@ -21,9 +22,24 @@ public class WaylandActivity extends Activity
         super.onCreate(savedInstanceState);
         sView = new SurfaceView(this);
         SurfaceHolder holder = sView.getHolder();
-        renderer = new GLES20Renderer();
+        renderer = new GLES20Renderer(this);
         holder.addCallback(renderer);
         setContentView(sView);
+
+        
+        renderThread = new Thread(new Runnable() {
+            public void run()
+            {
+                while (true) {
+                    renderer.render(null);
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        });
+        renderThread.start();
 
         /*
         try {

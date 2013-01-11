@@ -1,11 +1,16 @@
 package net.jlekstrand.wayland.compositor;
 
+import java.nio.ByteOrder;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.io.IOException;
 
 import android.util.Log;
-import android.view.Surface;
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.view.SurfaceHolder;
 import android.opengl.GLES20;
+
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLContext;
@@ -29,6 +34,7 @@ public class GLES20Renderer extends AbstractRenderer
         public ShaderCompileError(int shader)
         {
             super(GLES20.glGetShaderInfoLog(shader));
+            GLES20.glDeleteShader(shader);
         }
     }
     
@@ -42,10 +48,11 @@ public class GLES20Renderer extends AbstractRenderer
         public ProgramLinkError(int program)
         {
             super(GLES20.glGetProgramInfoLog(program));
+            GLES20.glDeleteProgram(program);
         }
     }
 
-    QueuedExecutorThread renderThread;
+    private AssetManager assetManager;
 
     EGLDisplay display;
     EGLConfig config;
@@ -53,8 +60,12 @@ public class GLES20Renderer extends AbstractRenderer
     EGLContext context;
     EGL10 egl;
 
-    public GLES20Renderer()
-    { }
+    private int program;
+
+    public GLES20Renderer(Context context)
+    {
+        this.assetManager = context.getAssets();
+    }
 
     private EGLConfig chooseEGLConfig()
     {
@@ -76,6 +87,35 @@ public class GLES20Renderer extends AbstractRenderer
             return null;
         else
             return configs[0];
+    }
+
+    private void createShaderPrograms()
+    {
+        int vshader;
+        int fshader;
+
+        try {
+            vshader = loadShader(GLES20.GL_VERTEX_SHADER, "hello.vert");
+            fshader = loadShader(GLES20.GL_FRAGMENT_SHADER, "hello.frag");
+        } catch (IOException e) {
+            throw new Error("Failed to load shader", e);
+        }
+
+        program = GLES20.glCreateProgram();
+        if (program == 0)
+            throw new OutOfMemoryError("Failed to create Program");
+
+        GLES20.glAttachShader(program, vshader);
+        GLES20.glAttachShader(program, fshader);
+        GLES20.glLinkProgram(program);
+
+        int status[] = new int[1];
+        GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, status, 0);
+        if (status[0] != GLES20.GL_TRUE) {
+            GLES20.glDeleteShader(vshader);
+            GLES20.glDeleteShader(fshader);
+            throw new ProgramLinkError(program);
+        }
     }
 
     @Override
@@ -125,6 +165,8 @@ public class GLES20Renderer extends AbstractRenderer
             return;
         }
         egl.eglMakeCurrent(display, surface, surface, context);
+
+        createShaderPrograms();
     }
 
     @Override
@@ -149,8 +191,13 @@ public class GLES20Renderer extends AbstractRenderer
         return;
     }
 
-    private int createAndCompileShader(int shaderType, String source)
+    private int loadShader(int shaderType, String assetName) throws IOException
     {
+        java.io.InputStream stream = assetManager.open("shaders/" + assetName);
+        // Got this trick from StackOverflow:
+        // http://stackoverflow.com/questions/309424/read-convert-an-inputstream-to-a-string
+        String source = (new java.util.Scanner(stream).useDelimiter("\\A")).next();
+
         int shader = GLES20.glCreateShader(shaderType);
         if (shader == 0)
             throw new OutOfMemoryError("Failed to create shader");
@@ -161,7 +208,6 @@ public class GLES20Renderer extends AbstractRenderer
         int status[] = new int[1];
         GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0);
         if (status[0] != GLES20.GL_TRUE) {
-            GLES20.glDeleteShader(shader);
             throw new ShaderCompileError(shader);
         }
 
