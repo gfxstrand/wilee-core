@@ -4,31 +4,42 @@ import java.util.ArrayDeque;
 
 class QueuedExecutorThread extends Thread implements QueuedExecutor
 {
-    ArrayDeque<Runnable> jobQueue;
-    boolean running = true;
+    private enum State {
+        RUNNING,
+        FINISHING,
+        STOPPED
+    };
+
+    private ArrayDeque<Runnable> jobQueue;
+    private State state;
 
     public QueuedExecutorThread()
     {
         jobQueue = new ArrayDeque<Runnable>();
+        state = State.STOPPED;
     }
 
     public void run()
     {
-        running = true;
+        state = State.RUNNING;
 
-        while (running) {
+        while (state != State.STOPPED) {
             Runnable job = null;
             synchronized (jobQueue)
             {
-                while(jobQueue.isEmpty() && running) {
+                while(jobQueue.isEmpty() && state == State.RUNNING) {
                     try {
                         jobQueue.wait();
                     } catch (InterruptedException e) {
                     }
                 }
 
-                if (! running)
+                if (jobQueue.isEmpty() && state == State.FINISHING) {
+                    state = State.STOPPED;
                     return;
+                } else if (jobQueue.isEmpty() || state == State.STOPPED) {
+                    throw new IllegalStateException();
+                }
 
                 job = jobQueue.peek();
             }
@@ -43,12 +54,12 @@ class QueuedExecutorThread extends Thread implements QueuedExecutor
         }
     }
 
-    public void waitForEmpty() throws InterruptedException
+    public void finished()
     {
         synchronized (jobQueue)
         {
-            while (! jobQueue.isEmpty())
-                jobQueue.wait();
+            state = State.FINISHING;
+            jobQueue.notifyAll();
         }
     }
 

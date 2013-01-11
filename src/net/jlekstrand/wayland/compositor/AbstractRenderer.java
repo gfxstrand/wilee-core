@@ -5,6 +5,51 @@ import android.view.SurfaceHolder;
 
 class AbstractRenderer implements Renderer
 {
+    private static abstract class SafeHandoffRunnable implements Runnable{
+        boolean finished;
+        java.lang.Error error;
+
+        public SafeHandoffRunnable()
+        {
+            error = null;
+            finished = false;
+        }
+
+        public abstract void onRun();
+
+        @Override
+        public final void run()
+        {
+            java.lang.Error cachedError;
+            try {
+                onRun();
+                cachedError = null;
+            } catch (java.lang.Error e) {
+                cachedError = e;
+            }
+
+            synchronized (this) {
+                error = cachedError;
+                finished = true;
+                this.notifyAll();
+            }
+        }
+
+        public final synchronized void waitForHandoff()
+        {
+            while (! finished) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                }
+            }
+
+            if (error != null)
+                throw error;
+        }
+
+    }
+
     QueuedExecutorThread renderThread;
 
     protected void onRender(Shell shell)
@@ -34,20 +79,15 @@ class AbstractRenderer implements Renderer
         if (renderThread == null)
             return;
 
-        renderThread.execute(new Runnable() {
-            public void run()
+        SafeHandoffRunnable closure = new SafeHandoffRunnable() {
+            public void onRun()
             {
                 onRender(shell);
             }
-        });
+        };
 
-        while (true) {
-            try {
-                renderThread.waitForEmpty();
-                break;
-            } catch (InterruptedException e) {
-            }
-        }
+        renderThread.execute(closure);
+        closure.waitForHandoff();
     }
 
     @Override
@@ -70,11 +110,15 @@ class AbstractRenderer implements Renderer
         if (renderThread == null)
             return;
 
-        renderThread.execute(new Runnable() {
-            public void run() {
+        SafeHandoffRunnable closure = new SafeHandoffRunnable() {
+            public void onRun()
+            {
                 onSurfaceChanged(holder, format, width, height);
             }
-        });
+        };
+
+        renderThread.execute(closure);
+        closure.waitForHandoff();
     }
 
     @Override
@@ -88,19 +132,17 @@ class AbstractRenderer implements Renderer
         QueuedExecutorThread tmpThread = renderThread;
         renderThread = null;
 
-        tmpThread.execute(new Runnable() {
-            public void run() {
+        SafeHandoffRunnable closure = new SafeHandoffRunnable() {
+            public void onRun()
+            {
                 onSurfaceDestroyed(holder);
             }
-        });
+        };
 
-        while (true) {
-            try {
-                tmpThread.waitForEmpty();
-                break;
-            } catch (InterruptedException e) {
-            }
-        }
+        tmpThread.execute(closure);
+        tmpThread.finished();
+
+        closure.waitForHandoff();
     }
 }
 
