@@ -6,7 +6,7 @@ abstract class AbstractRenderer implements Renderer
 {
     private static abstract class SafeHandoffRunnable implements Runnable{
         boolean finished;
-        java.lang.Error error;
+        java.lang.Throwable error;
 
         public SafeHandoffRunnable()
         {
@@ -19,11 +19,13 @@ abstract class AbstractRenderer implements Renderer
         @Override
         public final void run()
         {
-            java.lang.Error cachedError;
+            java.lang.Throwable cachedError;
             try {
                 onRun();
                 cachedError = null;
             } catch (java.lang.Error e) {
+                cachedError = e;
+            } catch (java.lang.RuntimeException e) {
                 cachedError = e;
             }
 
@@ -43,8 +45,13 @@ abstract class AbstractRenderer implements Renderer
                 }
             }
 
-            if (error != null)
-                throw error;
+            if (error != null) {
+                if (error instanceof java.lang.Error)
+                    throw (java.lang.Error)error;
+
+                if (error instanceof java.lang.RuntimeException)
+                    throw (java.lang.RuntimeException)error;
+            }
         }
 
     }
