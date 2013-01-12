@@ -49,7 +49,6 @@ class QueuedExecutorThread extends Thread implements QueuedExecutor
             synchronized (jobQueue)
             {
                 jobQueue.poll();
-                jobQueue.notifyAll();
             }
         }
     }
