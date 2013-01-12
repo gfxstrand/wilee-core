@@ -1,5 +1,10 @@
 package net.jlekstrand.wayland.compositor;
 
+import java.lang.Runnable;
+import java.io.File;
+
+import android.util.Log;
+
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
@@ -8,18 +13,25 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.protocol.wl_compositor;
 import org.freedesktop.wayland.protocol.wl_shm;
 
-import java.io.File;
-
 public class Compositor implements Global.BindHandler, wl_compositor.Requests
 {
     Display display;
     Shm shm;
     Shell shell;
 
+    EventLoopQueuedExecutor jobExecutor;
+
     public Compositor()
     {
         display = new Display();
         display.addGlobal(wl_compositor.WAYLAND_INTERFACE, this);
+
+        try {
+            jobExecutor = new EventLoopQueuedExecutor();
+            jobExecutor.addToEventLoop(display.getEventLoop());
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
 
         shm = new Shm();
         display.addGlobal(shm.getGlobal());
@@ -47,12 +59,19 @@ public class Compositor implements Global.BindHandler, wl_compositor.Requests
         display.run();
     }
 
+    public void queueEvent(Runnable runnable)
+    {
+        jobExecutor.execute(runnable);
+    }
+
+    @Override
     public void createSurface(Client client, int id)
     {
         Region region = new Region(id);
         client.addResource(region);
     }
 
+    @Override
     public void createRegion(Client client, int id)
     {
         Surface surface = new Surface(id);
