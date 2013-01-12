@@ -3,7 +3,7 @@
 #include <sys/mman.h>
 
 JNIEXPORT jobject JNICALL
-Java_net_jlekstrand_wayland_ShmPool_map(JNIEnv * env, jclass clazz,
+Java_net_jlekstrand_wayland_compositor_ShmPool_map(JNIEnv * env, jclass clazz,
         int fd, int size)
 {
     void * buffer;
@@ -14,8 +14,8 @@ Java_net_jlekstrand_wayland_ShmPool_map(JNIEnv * env, jclass clazz,
 }
 
 JNIEXPORT jobject JNICALL
-Java_net_jlekstrand_wayland_ShmPool_unmap(JNIEnv * env, jclass clazz,
-        jobject buffer)
+Java_net_jlekstrand_wayland_compositor_ShmPool_unmap(JNIEnv * env,
+        jclass clazz, jobject buffer)
 {
     void * data;
     int size;
