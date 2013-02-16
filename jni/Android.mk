@@ -5,7 +5,6 @@ WAYLAND_APP_SRC := \
 	src/shm_pool.c \
 	src/event_loop_queued_executor.c
 
-
 include $(CLEAR_VARS)
 
 LOCAL_MODULE 			:= wayland-app

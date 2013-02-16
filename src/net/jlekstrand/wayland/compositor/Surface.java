@@ -15,6 +15,9 @@ import android.graphics.Region;
 
 class Surface extends Resource implements wl_surface.Requests
 {
+    private final int id;
+    private final Compositor comp;
+
     // These refer to the current Surface data
     private Buffer buffer;
     private Listener bufferDestroyListener = new Listener() {
@@ -42,9 +45,11 @@ class Surface extends Resource implements wl_surface.Requests
     // going
     private ArrayList<Callback> frameCallbacks;
 
-    public Surface(int id)
+    public Surface(int id, Compositor comp)
     {
         super(wl_surface.WAYLAND_INTERFACE, id);
+        this.id = id;
+        this.comp = comp;
 
         damage = new Region();
         pendingDamage = new Region();
@@ -59,6 +64,16 @@ class Surface extends Resource implements wl_surface.Requests
             callback.destroy();
         }
         frameCallbacks.clear();
+    }
+
+    public Buffer getBuffer()
+    {
+        return buffer;
+    }
+
+    public Region getDamage()
+    {
+        return damage;
     }
 
     @Override
@@ -123,11 +138,20 @@ class Surface extends Resource implements wl_surface.Requests
 
         damage.op(pendingDamage, Region.Op.UNION);
         pendingDamage = new Region();
+
+        comp.surfaceDamaged(this, damage);
     }
 
     @Override
 	public void setBufferTransform(Client client, int transform)
     {
+        return;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return id;
     }
 }
 

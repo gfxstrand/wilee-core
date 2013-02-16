@@ -28,6 +28,8 @@ class ShmBuffer extends Buffer
 
     public ByteBuffer getBuffer()
     {
+        return pool.getBuffer();
+        /*
         ByteBuffer buffer = pool.getBuffer();
         if (buffer != null) {
             buffer.position(offset);
@@ -37,6 +39,7 @@ class ShmBuffer extends Buffer
         } else {
             return null;
         }
+        */
     }
 
     public int getStride()
@@ -52,6 +55,7 @@ class ShmBuffer extends Buffer
     @Override
     public void destroy(Client client)
     {
+        pool.release();
         super.destroy(client);
     }
 }

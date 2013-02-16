@@ -2,26 +2,29 @@ package net.jlekstrand.wayland.compositor;
 
 import android.view.SurfaceHolder;
 
-abstract class AbstractRenderer implements Renderer
+abstract class AbstractSurfaceRenderer
+        implements Renderer, SurfaceHolder.Callback
 {
     private static abstract class SafeHandoffRunnable implements Runnable{
         boolean finished;
         java.lang.Throwable error;
+        Object returnValue;
 
         public SafeHandoffRunnable()
         {
-            error = null;
             finished = false;
+            error = null;
+            returnValue = null;
         }
 
-        public abstract void onRun();
+        public abstract Object onRun();
 
         @Override
         public final void run()
         {
             java.lang.Throwable cachedError;
             try {
-                onRun();
+                returnValue = onRun();
                 cachedError = null;
             } catch (java.lang.Error e) {
                 cachedError = e;
@@ -36,7 +39,7 @@ abstract class AbstractRenderer implements Renderer
             }
         }
 
-        public final synchronized void waitForHandoff()
+        public final synchronized Object waitForHandoff()
         {
             while (! finished) {
                 try {
@@ -52,18 +55,25 @@ abstract class AbstractRenderer implements Renderer
                 if (error instanceof java.lang.RuntimeException)
                     throw (java.lang.RuntimeException)error;
             }
+
+            return returnValue;
         }
 
     }
 
     QueuedExecutorThread renderThread;
 
-    protected abstract void onDrawSurface(Surface surface);
-
-    protected void onRender(Shell shell)
+    protected void onBeginRender(boolean clear)
     {
         return;
     }
+
+    protected int onEndRender()
+    {
+        return (int)java.lang.System.currentTimeMillis();
+    }
+
+    protected abstract void onDrawSurface(Surface surface);
 
     protected void onSurfaceCreated(SurfaceHolder holder)
     {
@@ -82,15 +92,16 @@ abstract class AbstractRenderer implements Renderer
     }
 
     @Override
-    public final void drawSurface(final Surface surface)
+    public final void beginRender(final boolean clear)
     {
         if (renderThread == null)
             return;
 
         SafeHandoffRunnable closure = new SafeHandoffRunnable() {
-            public void onRun()
+            public Object onRun()
             {
-                onDrawSurface(surface);
+                onBeginRender(clear);
+                return null;
             }
         };
 
@@ -99,15 +110,33 @@ abstract class AbstractRenderer implements Renderer
     }
 
     @Override
-    public final void render(final Shell shell)
+    public final int endRender()
+    {
+        if (renderThread == null)
+            return 0;
+
+        SafeHandoffRunnable closure = new SafeHandoffRunnable() {
+            public Object onRun()
+            {
+                return onEndRender();
+            }
+        };
+
+        renderThread.execute(closure);
+        return (Integer)closure.waitForHandoff();
+    }
+
+    @Override
+    public final void drawSurface(final Surface surface)
     {
         if (renderThread == null)
             return;
 
         SafeHandoffRunnable closure = new SafeHandoffRunnable() {
-            public void onRun()
+            public Object onRun()
             {
-                onRender(shell);
+                onDrawSurface(surface);
+                return null;
             }
         };
 
@@ -136,9 +165,10 @@ abstract class AbstractRenderer implements Renderer
             return;
 
         SafeHandoffRunnable closure = new SafeHandoffRunnable() {
-            public void onRun()
+            public Object onRun()
             {
                 onSurfaceChanged(holder, format, width, height);
+                return null;
             }
         };
 
@@ -158,9 +188,10 @@ abstract class AbstractRenderer implements Renderer
         renderThread = null;
 
         SafeHandoffRunnable closure = new SafeHandoffRunnable() {
-            public void onRun()
+            public Object onRun()
             {
                 onSurfaceDestroyed(holder);
+                return null;
             }
         };
 

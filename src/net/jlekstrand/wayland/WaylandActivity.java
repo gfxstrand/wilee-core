@@ -4,16 +4,20 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder;
+import android.util.Log;
 
 import net.jlekstrand.wayland.compositor.Compositor;
-import net.jlekstrand.wayland.compositor.Renderer;
 import net.jlekstrand.wayland.compositor.GLES20Renderer;
 
-public class WaylandActivity extends Activity
+public class WaylandActivity extends Activity implements SurfaceHolder.Callback
 {
     SurfaceView sView;
-    Renderer renderer;
+    GLES20Renderer renderer;
     Thread renderThread;
+
+    Compositor compositor;
+    boolean has_surface;
+    boolean running;
 
     /** Called when the activity is first created. */
     @Override
@@ -22,24 +26,8 @@ public class WaylandActivity extends Activity
         super.onCreate(savedInstanceState);
         sView = new SurfaceView(this);
         SurfaceHolder holder = sView.getHolder();
-        renderer = new GLES20Renderer(this);
-        holder.addCallback(renderer);
+        holder.addCallback(this);
         setContentView(sView);
-
-        
-        renderThread = new Thread(new Runnable() {
-            public void run()
-            {
-                while (true) {
-                    renderer.render(null);
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
-        });
-        renderThread.start();
 
         /*
         try {
@@ -48,16 +36,17 @@ public class WaylandActivity extends Activity
         }
         */
 
-        /*
+        has_surface = false;
+        running = false;
 
-        final Compositor comp = new Compositor();
+        renderer = new GLES20Renderer(this);
+        compositor = new Compositor();
         new Thread(new Runnable() {
             public void run()
             {
-                comp.run();
+                compositor.run();
             }
         }).start();
-        */
     }
 
     @Override
@@ -72,6 +61,9 @@ public class WaylandActivity extends Activity
     onResume()
     {
         super.onResume();
+        running = true;
+        if (has_surface)
+            compositor.setRenderer(renderer);
     }
 
     @Override
@@ -79,6 +71,8 @@ public class WaylandActivity extends Activity
     onPause()
     {
         super.onPause();
+        running = false;
+        compositor.setRenderer(null);
     }
 
     @Override
@@ -86,5 +80,29 @@ public class WaylandActivity extends Activity
     onStop()
     {
         super.onStop();
+    }
+
+    @Override
+    public void surfaceDestroyed(final SurfaceHolder holder)
+    {
+        has_surface = false;
+        compositor.setRenderer(null);
+        renderer.surfaceDestroyed(holder);
+    }
+
+    @Override
+    public void surfaceChanged(final SurfaceHolder holder,
+            int format, int width, int height)
+    {
+        renderer.surfaceChanged(holder, format, width, height);
+    }
+
+    @Override
+    public void surfaceCreated(final SurfaceHolder holder)
+    {
+        renderer.surfaceCreated(holder);
+        has_surface = true;
+        if (running)
+            compositor.setRenderer(renderer);
     }
 }

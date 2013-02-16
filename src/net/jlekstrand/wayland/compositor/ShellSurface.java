@@ -10,7 +10,7 @@ import org.freedesktop.wayland.protocol.wl_output;
 
 class ShellSurface extends Resource implements wl_shell_surface.Requests
 {
-    Surface surface;
+    public final Surface surface;
 
     public ShellSurface(int id, Surface surface)
     {
