@@ -13,23 +13,24 @@ class ShmPool extends Resource implements wl_shm_pool.Requests
 {
     private static final String LOG_PREFIX = "Wayland:ShmPool";
 
-    private int fd;
-    private int size;
     private int refCount;
-    private ByteBuffer buffer;
+    private org.freedesktop.wayland.ShmPool pool;
 
     public ShmPool(int id, int fd, int size)
     {
         super(wl_shm_pool.WAYLAND_INTERFACE, id);
-        this.fd = fd;
-        this.size = size;
         this.refCount = 1;
-        this.buffer = map(fd, size);
+        try {
+            this.pool = org.freedesktop.wayland.ShmPool.fromFileDescriptor(
+                    fd, size, false, true);
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ByteBuffer getBuffer()
     {
-        return buffer.asReadOnlyBuffer();
+        return pool.asByteBuffer();
     }
 
     @Override
@@ -41,7 +42,7 @@ class ShmPool extends Resource implements wl_shm_pool.Requests
         if (width < 0 || height < 0 || stride < 0 || offset < 0)
             throw new ArrayIndexOutOfBoundsException();
 
-        if (stride < width * 4 || height * stride + offset > size)
+        if (stride < width * 4 || height * stride + offset > pool.size())
             throw new ArrayIndexOutOfBoundsException();
 
         // Yeah, there's no error checking yet... That needs to be fixed
@@ -56,9 +57,13 @@ class ShmPool extends Resource implements wl_shm_pool.Requests
     {
         --refCount;
 
-        if (refCount == 0 && buffer == null) {
-            unmap(buffer);
-            buffer = null;
+        if (refCount == 0 && pool != null) {
+            try {
+                pool.close();
+            } catch (java.io.IOException e) {
+                throw new RuntimeException(e);
+            }
+            pool = null;
         }
     }
 
@@ -73,19 +78,11 @@ class ShmPool extends Resource implements wl_shm_pool.Requests
     @Override
 	public void resize(Client client, int size)
     {
-        // TODO: This should be implemented better
-        unmap(buffer);
-        this.size = size;
-        this.buffer = map(fd, size);
-        if (this.buffer == null)
-            throw new NullPointerException();
-    }
-
-    private static native ByteBuffer map(int fd, int size);
-    private static native void unmap(ByteBuffer buffer);
-
-    static {
-        System.loadLibrary("wayland-app");
+        try {
+            pool.resize(size);
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

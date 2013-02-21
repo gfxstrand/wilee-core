@@ -2,7 +2,6 @@ LOCAL_PATH := $(call my-dir)
 
 WAYLAND_APP_SRC := \
 	src/jni_util.c \
-	src/shm_pool.c \
 	src/event_loop_queued_executor.c
 
 include $(CLEAR_VARS)
