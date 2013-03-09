@@ -1,6 +1,4 @@
-package net.jlekstrand.wayland.compositor;
-
-import android.view.SurfaceHolder;
+package net.jlekstrand.wheatley;
 
 public interface Renderer
 {

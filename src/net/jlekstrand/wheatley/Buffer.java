@@ -1,11 +1,11 @@
-package net.jlekstrand.wayland.compositor;
+package net.jlekstrand.wheatley;
 
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Resource;
 
 import org.freedesktop.wayland.protocol.wl_buffer;
 
-class Buffer extends Resource implements wl_buffer.Requests
+public class Buffer extends Resource implements wl_buffer.Requests
 {
     protected final int width;
     protected final int height;

@@ -1,18 +1,14 @@
-package net.jlekstrand.wayland.compositor;
+package net.jlekstrand.wheatley;
 
 import java.nio.ByteBuffer;
-
-import android.util.Log;
 
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Resource;
 
 import org.freedesktop.wayland.protocol.wl_shm_pool;
 
-class ShmPool extends Resource implements wl_shm_pool.Requests
+public class ShmPool extends Resource implements wl_shm_pool.Requests
 {
-    private static final String LOG_PREFIX = "Wayland:ShmPool";
-
     private int refCount;
     private org.freedesktop.wayland.ShmPool pool;
 
@@ -37,8 +33,6 @@ class ShmPool extends Resource implements wl_shm_pool.Requests
 	public void createBuffer(Client client, int id, int offset, int width,
             int height, int stride, int format)
     {
-        Log.d(LOG_PREFIX, "Creating SHM Buffer");
-
         if (width < 0 || height < 0 || stride < 0 || offset < 0)
             throw new ArrayIndexOutOfBoundsException();
 
@@ -70,7 +64,6 @@ class ShmPool extends Resource implements wl_shm_pool.Requests
     @Override
     public void destroy(Client client)
     {
-        Log.d(LOG_PREFIX, "SHM Pool Destroyed");
         release();
         super.destroy();
     }

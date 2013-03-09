@@ -1,9 +1,8 @@
-package net.jlekstrand.wayland.compositor;
+package net.jlekstrand.wheatley;
 
 import java.lang.Runnable;
+import java.lang.Thread;
 import java.io.File;
-
-import android.util.Log;
 
 import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.Display;
@@ -15,16 +14,16 @@ import org.freedesktop.wayland.protocol.wl_shm;
 
 public class Compositor implements Global.BindHandler, wl_compositor.Requests
 {
-    private static final String LOG_PREFIX = "Wayland:Compositor";
+    private static final String LOG_PREFIX = "Compositor";
 
-    private Display display;
-    private Shm shm;
-    private Shell shell;
+    protected Display display;
+    protected Shm shm;
+    protected Shell shell;
+    protected Renderer renderer;
 
-    private Renderer renderer;
-    boolean render_pending;
-
-    EventLoopQueuedExecutor jobExecutor;
+    private boolean render_pending;
+    private EventLoopQueuedExecutor jobExecutor;
+    private Thread compositorThread;
 
     public Compositor()
     {
@@ -51,24 +50,27 @@ public class Compositor implements Global.BindHandler, wl_compositor.Requests
     @Override
     public void bindClient(Client client, int version, int id)
     {
-        Log.d(LOG_PREFIX, "Binding Compositor");
         client.addObject(wl_compositor.WAYLAND_INTERFACE, id, this);
     }
 
     public void run()
     {
-        File simple_shm = new File("/data/local/tmp", "simple-shm");
-        String[] args = {
-            "simple-shm"
-        };
-        Client.startClient(display, simple_shm, args);
-
+        compositorThread = Thread.currentThread();
         display.run();
     }
 
-    public void queueEvent(Runnable runnable)
+    public void queueEvent(final Runnable runnable)
     {
-        jobExecutor.execute(runnable);
+        if (Thread.currentThread() == compositorThread) {
+            display.getEventLoop().addIdle(new EventLoop.IdleHandler() {
+                public void handleIdle()
+                {
+                    runnable.run();
+                }
+            });
+        } else {
+            jobExecutor.execute(runnable);
+        }
     }
 
     private void requestRender()
@@ -92,7 +94,6 @@ public class Compositor implements Global.BindHandler, wl_compositor.Requests
 
     public void setRenderer(Renderer renderer)
     {
-        Log.d(LOG_PREFIX, "Setting Renderer: " + renderer);
         this.renderer = renderer;
 
         if (renderer != null) {
@@ -117,7 +118,6 @@ public class Compositor implements Global.BindHandler, wl_compositor.Requests
     @Override
     public void createSurface(Client client, int id)
     {
-        Log.d(LOG_PREFIX, "Creating Surface");
         Surface surface = new Surface(id, this);
         client.addResource(surface);
     }

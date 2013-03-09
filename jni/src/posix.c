@@ -11,8 +11,8 @@
 #include "jni_util.h"
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wayland_compositor_EventLoopQueuedExecutor_nativePipe(
-        JNIEnv * env, jclass clazz, jintArray jpipefd)
+Java_net_jlekstrand_wheatley_POSIX_pipe(JNIEnv * env, jclass clazz,
+        jintArray jpipefd)
 {
     int pipefd[2];
     int success;
@@ -70,35 +70,57 @@ error:
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wayland_compositor_EventLoopQueuedExecutor_nativeClose(
-        JNIEnv * env, jclass clazz, int fd)
+Java_net_jlekstrand_wheatley_POSIX_close(JNIEnv * env, jclass clazz, int fd)
 {
     if (close(fd) == -1)
         jni_util_throw_by_name(env, "java/io/IOException", strerror(errno));
 }
 
-JNIEXPORT jbyte JNICALL
-Java_net_jlekstrand_wayland_compositor_EventLoopQueuedExecutor_nativeRead(
-        JNIEnv * env, jclass clazz, int fd)
+JNIEXPORT void JNICALL
+Java_net_jlekstrand_wheatley_POSIX_Read(JNIEnv * env, jclass clazz,
+        jbyteArray jbuff, jlong count)
 {
     ssize_t size;
-    jbyte byte;
+    jbyte *buff;
 
-    size = read(fd, &byte, 1);
+    if (count > (*env)->GetArrayLength(env, jbuff)) {
+        jni_util_throw_by_name(env, "java/lang/ArrayIndexOutOfBoundsException",
+                NULL);
+        return;
+    }
+
+    buff = (*env)->GetByteArrayElements(env, jbuff, NULL);
+    if (buff == NULL)
+        return; /* Exception Thrown */
+
+    size = read(fd, buff, count);
     if (size != 1)
         jni_util_throw_by_name(env, "java/io/IOException", strerror(errno));
 
-    return byte;
+    (*env)->ReleaseByteArrayElements(env, jbuff, buff, 0);
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wayland_compositor_EventLoopQueuedExecutor_nativeWrite(
-        JNIEnv * env, jclass clazz, int fd, jbyte b)
+Java_net_jlekstrand_wheatley_POSIX_write(JNIEnv * env, jclass clazz, int fd,
+        jbyteArray jbuff, jlong count)
 {
     ssize_t size;
+    jbyte *buff;
 
-    size = write(fd, &b, 1);
+    if (count > (*env)->GetArrayLength(env, jbuff)) {
+        jni_util_throw_by_name(env, "java/lang/ArrayIndexOutOfBoundsException",
+                NULL);
+        return;
+    }
+
+    buff = (*env)->GetByteArrayElements(env, jbuff, NULL);
+    if (buff == NULL)
+        return; /* Exception Thrown */
+
+    size = write(fd, buff, count);
     if (size != 1)
         jni_util_throw_by_name(env, "java/io/IOException", strerror(errno));
+
+    (*env)->ReleaseByteArrayElements(env, jbuff, buff, JNI_ABORT);
 }
 

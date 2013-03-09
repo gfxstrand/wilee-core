@@ -1,4 +1,4 @@
-package net.jlekstrand.wayland.compositor;
+package net.jlekstrand.wheatley;
 
 import java.util.LinkedList;
 
@@ -14,7 +14,7 @@ import org.freedesktop.wayland.protocol.wl_surface;
 
 class TilingShell implements Shell, Global.BindHandler
 {
-    private static final String LOG_PREFIX = "Wayland:TilingShell";
+    private static final String LOG_PREFIX = "TilingShell";
 
     private LinkedList<ShellSurface> surfaces;
 
@@ -51,7 +51,6 @@ class TilingShell implements Shell, Global.BindHandler
     @Override
     public void bindClient(Client client, int version, int id)
     {
-        Log.d(LOG_PREFIX, "Binding Tiling Shell object");
         client.addObject(wl_shell.WAYLAND_INTERFACE, id, this);
     }
 
@@ -68,7 +67,6 @@ class TilingShell implements Shell, Global.BindHandler
                 surfaces.remove(ssurface);
             }
         });
-        Log.d(LOG_PREFIX, "Creating Shell Surface");
         client.addResource(ssurface);
     }
 }

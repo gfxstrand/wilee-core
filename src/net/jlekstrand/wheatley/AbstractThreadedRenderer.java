@@ -1,11 +1,10 @@
-package net.jlekstrand.wayland.compositor;
+package net.jlekstrand.wheatley;
 
-import android.view.SurfaceHolder;
-
-abstract class AbstractSurfaceRenderer
-        implements Renderer, SurfaceHolder.Callback
+public abstract class AbstractThreadedRenderer
+        implements Renderer
 {
-    private static abstract class SafeHandoffRunnable implements Runnable{
+    protected static abstract class SafeHandoffRunnable implements Runnable
+    {
         boolean finished;
         java.lang.Throwable error;
         Object returnValue;
@@ -61,7 +60,7 @@ abstract class AbstractSurfaceRenderer
 
     }
 
-    QueuedExecutorThread renderThread;
+    protected QueuedExecutorThread renderThread;
 
     protected void onBeginRender(boolean clear)
     {
@@ -74,22 +73,6 @@ abstract class AbstractSurfaceRenderer
     }
 
     protected abstract void onDrawSurface(Surface surface);
-
-    protected void onSurfaceCreated(SurfaceHolder holder)
-    {
-        return;
-    }
-
-    protected void onSurfaceChanged(SurfaceHolder holder, int format,
-            int width, int height)
-    {
-        return;
-    }
-
-    protected void onSurfaceDestroyed(SurfaceHolder holder)
-    {
-        return;
-    }
 
     @Override
     public final void beginRender(final boolean clear)
@@ -141,63 +124,6 @@ abstract class AbstractSurfaceRenderer
         };
 
         renderThread.execute(closure);
-        closure.waitForHandoff();
-    }
-
-    @Override
-    public final void surfaceCreated(final SurfaceHolder holder)
-    {
-        renderThread = new QueuedExecutorThread();
-        renderThread.start();
-
-        renderThread.execute(new Runnable() {
-            public void run() {
-                onSurfaceCreated(holder);
-            }
-        });
-    }
-
-    @Override
-    public final void surfaceChanged(final SurfaceHolder holder,
-            final int format, final int width, final int height)
-    {
-        if (renderThread == null)
-            return;
-
-        SafeHandoffRunnable closure = new SafeHandoffRunnable() {
-            public Object onRun()
-            {
-                onSurfaceChanged(holder, format, width, height);
-                return null;
-            }
-        };
-
-        renderThread.execute(closure);
-        closure.waitForHandoff();
-    }
-
-    @Override
-    public final void surfaceDestroyed(final SurfaceHolder holder)
-    {
-        if (renderThread == null)
-            return;
-
-        // This makes sure our task is the last to get added to the render
-        // thread
-        QueuedExecutorThread tmpThread = renderThread;
-        renderThread = null;
-
-        SafeHandoffRunnable closure = new SafeHandoffRunnable() {
-            public Object onRun()
-            {
-                onSurfaceDestroyed(holder);
-                return null;
-            }
-        };
-
-        tmpThread.execute(closure);
-        tmpThread.finished();
-
         closure.waitForHandoff();
     }
 }

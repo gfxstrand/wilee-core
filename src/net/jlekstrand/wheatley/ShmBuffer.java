@@ -1,4 +1,4 @@
-package net.jlekstrand.wayland.compositor;
+package net.jlekstrand.wheatley;
 
 import java.nio.ByteBuffer;
 
@@ -7,7 +7,7 @@ import org.freedesktop.wayland.server.Resource;
 
 import org.freedesktop.wayland.protocol.wl_shm_pool;
 
-class ShmBuffer extends Buffer
+public class ShmBuffer extends Buffer
 {
     private final int offset;
     private final int stride;
@@ -15,7 +15,7 @@ class ShmBuffer extends Buffer
 
     private final ShmPool pool;
 
-	public ShmBuffer(int id, ShmPool pool, int offset, int width, int height,
+    public ShmBuffer(int id, ShmPool pool, int offset, int width, int height,
             int stride, int format)
     {
         super(id, width, height);
@@ -29,17 +29,6 @@ class ShmBuffer extends Buffer
     public ByteBuffer getBuffer()
     {
         return pool.getBuffer();
-        /*
-        ByteBuffer buffer = pool.getBuffer();
-        if (buffer != null) {
-            buffer.position(offset);
-            ByteBuffer slice = buffer.slice();
-            slice.limit(height * stride);
-            return slice;
-        } else {
-            return null;
-        }
-        */
     }
 
     public int getStride()

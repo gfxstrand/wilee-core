@@ -1,9 +1,7 @@
-package net.jlekstrand.wayland.compositor;
+package net.jlekstrand.wheatley;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
-
-import android.util.Log;
 
 import org.freedesktop.wayland.server.EventLoop;
 
@@ -28,7 +26,7 @@ class EventLoopQueuedExecutor
         running = false;
 
         pipefd = new int[2];
-        nativePipe(pipefd);
+        POSIX.pipe(pipefd);
     }
 
     public void addToEventLoop(EventLoop loop) throws IOException
@@ -36,16 +34,6 @@ class EventLoopQueuedExecutor
         synchronized (jobQueue) {
             running = true;
             eventLoop = loop;
-        }
-
-        Log.d("EventLoopQueuedExecutor", "Testing Pipe (" + pipefd[0] + ", "
-                + pipefd[1] + ")");
-        nativeWrite(pipefd[1], (byte)7);
-        byte b = nativeRead(pipefd[0]);
-        if (b == (byte)7) {
-            Log.d("EventLoopQueuedExecutor", "Pipe Test Successful");
-        } else {
-            Log.d("EventLoopQueuedExecutor", "Pipe Test Failed");
         }
 
         eventSource = eventLoop.addFileDescriptor(pipefd[0],
@@ -60,12 +48,12 @@ class EventLoopQueuedExecutor
             running = false;
 
             try {
-                nativeClose(pipefd[0]);
+                POSIX.close(pipefd[0]);
             } catch (IOException e) {
             }
 
             try {
-                nativeClose(pipefd[1]);
+                POSIX.close(pipefd[1]);
             } catch (IOException e) {
             }
 
@@ -100,17 +88,16 @@ class EventLoopQueuedExecutor
 
     public int handleFileDescriptorEvent(int fd, int mask)
     {
-        Log.d("EventLoopQueuedExecutor", "Handling Events");
-
         try {
-            byte event = nativeRead(pipefd[0]);
+            byte event[] = new byte[1];
+            POSIX.read(pipefd[0], event);
 
             while (true) {
-                handleEvent(event);
+                handleEvent(event[0]);
 
                 synchronized (jobQueue) {
                     if (! jobQueue.isEmpty()) {
-                        event = nativeRead(pipefd[0]);
+                        POSIX.read(pipefd[0], event);
                     } else {
                         break;
                     }
@@ -131,7 +118,8 @@ class EventLoopQueuedExecutor
                     return;
 
                 jobQueue.offer(job);
-                nativeWrite(pipefd[1], EVENT_NEW_JOB);
+                byte b[] = { EVENT_NEW_JOB };
+                POSIX.write(pipefd[1], b, 1);
             }
         } catch (IOException e) {
             cleanup();
@@ -146,20 +134,12 @@ class EventLoopQueuedExecutor
                     return;
 
                 running = false;
-                nativeWrite(pipefd[1], EVENT_FINISHED);
+                byte b[] = { EVENT_FINISHED };
+                POSIX.write(pipefd[1], b, 1);
             }
         } catch (IOException e) {
             cleanup();
         }
-    }
-
-    private native static void nativePipe(int pipefd[]) throws IOException;
-    private native static void nativeClose(int fd) throws IOException;
-    private native static byte nativeRead(int fd) throws IOException;
-    private native static void nativeWrite(int fd, byte b) throws IOException;
-
-    static {
-        System.loadLibrary("wayland-app");
     }
 }
 
