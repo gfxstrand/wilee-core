@@ -77,7 +77,7 @@ Java_net_jlekstrand_wheatley_POSIX_close(JNIEnv * env, jclass clazz, int fd)
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_POSIX_Read(JNIEnv * env, jclass clazz,
+Java_net_jlekstrand_wheatley_POSIX_Read(JNIEnv * env, jclass clazz, int fd,
         jbyteArray jbuff, jlong count)
 {
     ssize_t size;
