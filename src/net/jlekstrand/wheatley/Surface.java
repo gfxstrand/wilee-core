@@ -13,37 +13,35 @@ import java.util.ArrayList;
 import android.graphics.Rect;
 import android.graphics.Region;
 
-class Surface extends Resource implements wl_surface.Requests
+public class Surface extends Resource implements wl_surface.Requests
 {
+    private static class State
+    {
+        public Buffer buffer;
+        public Rect area;
+        public final Listener bufferDestroyListener = new Listener() {
+            public void onNotify()
+            {
+                buffer = null;
+                detach();
+            }
+        };
+        public Region damage = new Region();
+
+        public Region inputRegion;
+
+        public final ArrayList<Callback> callbacks = new ArrayList<Callback>();
+    }
+
     private final int id;
     private final Compositor comp;
 
     // These refer to the current Surface data
-    private Buffer buffer;
-    private Listener bufferDestroyListener = new Listener() {
-        public void onNotify()
-        {
-            buffer = null;
-            detach();
-        }
-    };
-    private Region damage;
+    private final State current;
+    private State pending;
 
     // These refer to pending Surface data that will get set on "commit"
     private Rect pendingBufferRect;
-    private Buffer pendingBuffer;
-    private Listener pendingBufferDestroyListener = new Listener() {
-        public void onNotify()
-        {
-            pendingBuffer = null;
-            detach();
-        }
-    };
-    private Region pendingDamage;
-
-    // These fields aren't really "data" as such, they just keep the surface
-    // going
-    private ArrayList<Callback> frameCallbacks;
 
     public Surface(int id, Compositor comp)
     {
@@ -51,29 +49,27 @@ class Surface extends Resource implements wl_surface.Requests
         this.id = id;
         this.comp = comp;
 
-        damage = new Region();
-        pendingDamage = new Region();
-
-        frameCallbacks = new ArrayList<Callback>();
+        current = new State();
+        pending = new State();
     }
 
     public void notifyFrameCallbacks(int serial)
     {
-        for (Callback callback : frameCallbacks) {
+        for (Callback callback : current.callbacks) {
             callback.done(serial);
             callback.destroy();
         }
-        frameCallbacks.clear();
+        current.callbacks.clear();
     }
 
     public Buffer getBuffer()
     {
-        return buffer;
+        return current.buffer;
     }
 
     public Region getDamage()
     {
-        return damage;
+        return current.damage;
     }
 
     @Override
@@ -85,20 +81,20 @@ class Surface extends Resource implements wl_surface.Requests
     @Override
 	public void attach(Client client, wl_buffer.Requests buffer, int x, int y)
     {
-        if (pendingBuffer != null)
-            pendingBufferDestroyListener.detach();
+        if (pending.buffer != null)
+            pending.bufferDestroyListener.detach();
 
-        pendingBuffer = (Buffer)buffer;
-        pendingBuffer.addDestroyListener(pendingBufferDestroyListener);
+        pending.buffer = (Buffer)buffer;
+        pending.buffer.addDestroyListener(pending.bufferDestroyListener);
 
-        pendingBufferRect = new Rect(x, y,
-                x + pendingBuffer.getWidth(), y + pendingBuffer.getHeight());
+        pending.area = new Rect(x, y,
+                x + pending.buffer.getWidth(), y + pending.buffer.getHeight());
     }
 
     @Override
 	public void damage(Client client, int x, int y, int width, int height)
     {
-        pendingDamage.op(new Rect(x, y, width, height), Region.Op.UNION);
+        pending.damage.op(new Rect(x, y, width, height), Region.Op.UNION);
     }
 
     @Override
@@ -106,7 +102,7 @@ class Surface extends Resource implements wl_surface.Requests
     {
         Callback callback = new Callback(callbackID);
         client.addResource(callback);
-        frameCallbacks.add(callback);
+        pending.callbacks.add(callback);
     }
 
     @Override
@@ -117,29 +113,45 @@ class Surface extends Resource implements wl_surface.Requests
     @Override
 	public void setInputRegion(Client client, wl_region.Requests region)
     {
+        if (region != null) {
+            net.jlekstrand.wheatley.Region inReg =
+                    (net.jlekstrand.wheatley.Region)region;
+            pending.inputRegion = inReg.getRegion();
+        } else {
+            pending.inputRegion = null;
+        }
     }
 
     @Override
 	public void commit(Client client)
     {
-        if (pendingBuffer != buffer) {
-            if (buffer != null) {
-                bufferDestroyListener.detach();
-                wl_buffer.postRelease(buffer);
+        if (pending.buffer != current.buffer) {
+            if (current.buffer != null) {
+                current.bufferDestroyListener.detach();
+                current.buffer.decrementReferenceCount();
             }
             // FIXME: Handle the resize correctly. Right now, no translations
             // are being applied.
-            buffer = pendingBuffer;
+            current.buffer = pending.buffer;
 
-            if (buffer != null) {
-                buffer.addDestroyListener(bufferDestroyListener);
+            if (current.buffer != null) {
+                current.buffer.incrementReferenceCount();
+                current.buffer.addDestroyListener(  
+                        current.bufferDestroyListener);
             }
         }
 
-        damage.op(pendingDamage, Region.Op.UNION);
-        pendingDamage = new Region();
+        current.damage.op(pending.damage, Region.Op.UNION);
+        comp.surfaceDamaged(this, pending.damage);
+        current.inputRegion = pending.inputRegion;
 
-        comp.surfaceDamaged(this, damage);
+        current.callbacks.addAll(pending.callbacks);
+
+        pending = new State();
+
+        // FIXME: This should not be needed anymore, but my simple-shm build
+        // still needs it
+        attach(null, current.buffer, 0, 0);
     }
 
     @Override

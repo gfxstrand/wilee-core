@@ -9,6 +9,7 @@ public class Buffer extends Resource implements wl_buffer.Requests
 {
     protected final int width;
     protected final int height;
+    protected int refCount;
 
     public Buffer(int id, int width, int height)
     {
@@ -16,6 +17,8 @@ public class Buffer extends Resource implements wl_buffer.Requests
 
         this.width = width;
         this.height = height;
+        
+        this.refCount = 0;
     }
 
     @Override
@@ -32,6 +35,19 @@ public class Buffer extends Resource implements wl_buffer.Requests
     public int getHeight()
     {
         return height;
+    }
+
+    public void incrementReferenceCount()
+    {
+        ++refCount;
+    }
+
+    public void decrementReferenceCount()
+    {
+        --refCount;
+
+        if (refCount == 0)
+            wl_buffer.postRelease(this);
     }
 }
 
