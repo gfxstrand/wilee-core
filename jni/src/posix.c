@@ -10,6 +10,13 @@
 
 #include "jni_util.h"
 
+#ifdef ANDROID
+#   include <android/log.h>
+#   define LOG_DEBUG(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "wheatley-core", __VA_ARGS__))
+#else
+#   define LOG_DEBUG(...)
+#endif
+
 JNIEXPORT void JNICALL
 Java_net_jlekstrand_wheatley_POSIX_pipe(JNIEnv * env, jclass clazz,
         jintArray jpipefd)
@@ -18,7 +25,7 @@ Java_net_jlekstrand_wheatley_POSIX_pipe(JNIEnv * env, jclass clazz,
     int success;
     int flags;
 
-    if (pipefd == NULL) {
+    if (jpipefd == NULL) {
         jni_util_throw_by_name(env, "java/lang/NullPointerException", NULL);
         return;
     }
@@ -77,11 +84,16 @@ Java_net_jlekstrand_wheatley_POSIX_close(JNIEnv * env, jclass clazz, int fd)
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_POSIX_Read(JNIEnv * env, jclass clazz, int fd,
+Java_net_jlekstrand_wheatley_POSIX_read(JNIEnv * env, jclass clazz, int fd,
         jbyteArray jbuff, jlong count)
 {
     ssize_t size;
     jbyte *buff;
+
+    if (jbuff == NULL) {
+        jni_util_throw_by_name(env, "java/lang/NullPointerException", NULL);
+        return;
+    }
 
     if (count > (*env)->GetArrayLength(env, jbuff)) {
         jni_util_throw_by_name(env, "java/lang/ArrayIndexOutOfBoundsException",
@@ -107,6 +119,11 @@ Java_net_jlekstrand_wheatley_POSIX_write(JNIEnv * env, jclass clazz, int fd,
     ssize_t size;
     jbyte *buff;
 
+    if (jbuff == NULL) {
+        jni_util_throw_by_name(env, "java/lang/NullPointerException", NULL);
+        return;
+    }
+
     if (count > (*env)->GetArrayLength(env, jbuff)) {
         jni_util_throw_by_name(env, "java/lang/ArrayIndexOutOfBoundsException",
                 NULL);
@@ -122,5 +139,65 @@ Java_net_jlekstrand_wheatley_POSIX_write(JNIEnv * env, jclass clazz, int fd,
         jni_util_throw_by_name(env, "java/io/IOException", strerror(errno));
 
     (*env)->ReleaseByteArrayElements(env, jbuff, buff, JNI_ABORT);
+}
+
+JNIEXPORT void JNICALL
+Java_net_jlekstrand_wheatley_POSIX__1setenv(JNIEnv * env, jclass clazz,
+        jbyteArray jname, jbyteArray jvalue, jboolean overwrite)
+{
+    jsize name_len, value_len;
+    jbyte *name, *value;
+
+    if (jname == NULL || jvalue == NULL) {
+        jni_util_throw_by_name(env, "java/lang/NullPointerException", NULL);
+        return;
+    }
+
+    name_len = (*env)->GetArrayLength(env, jname);
+    value_len = (*env)->GetArrayLength(env, jvalue);
+    if ((*env)->ExceptionCheck(env))
+        return;
+
+    name = malloc((name_len + 1) * sizeof *name);
+    if (name == NULL) {
+        jni_util_throw_by_name(env, "java/lang/OutOfMemoryError", NULL);
+        return;
+    }
+    value = malloc((value_len + 1) * sizeof *value);
+    if (value == NULL) {
+        jni_util_throw_by_name(env, "java/lang/OutOfMemoryError", NULL);
+        goto free_arrays;
+    }
+
+    (*env)->GetByteArrayRegion(env, jname, 0, name_len, name);
+    if ((*env)->ExceptionCheck(env))
+        goto free_arrays;
+    (*env)->GetByteArrayRegion(env, jvalue, 0, value_len, value);
+    if ((*env)->ExceptionCheck(env))
+        goto free_arrays;
+
+    name[name_len] = '\0';
+    value[value_len] = '\0';
+
+    if (setenv(name, value, overwrite) < 0) {
+        switch (errno) {
+        case ENOMEM:
+            jni_util_throw_by_name(env, "java/lang/OutOfMemoryError", NULL);
+            break;
+        case EINVAL:
+            jni_util_throw_by_name(env, "java/lang/IllegalArgumentException",
+                    NULL);
+            break;
+        default:
+            jni_util_throw_by_name(env, "java/lang/RuntimeException",
+                    strerror(errno));
+            break;
+        }
+        goto free_arrays;
+    }
+
+free_arrays:
+    free(value);
+    free(name);
 }
 
