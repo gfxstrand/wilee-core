@@ -47,6 +47,11 @@ public class Compositor implements Global.BindHandler, wl_compositor.Requests
         shell = tshell;
     }
 
+    public Display getDisplay()
+    {
+        return display;
+    }
+
     @Override
     public void bindClient(Client client, int version, int id)
     {
