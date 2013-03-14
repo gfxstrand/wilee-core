@@ -31,10 +31,10 @@ class Shm implements Global.BindHandler, wl_shm.Requests
     }
 
     @Override
-	public void createPool(Client client, int id, int fd, int size)
+	public void createPool(Resource resource, int id, int fd, int size)
     {
         ShmPool pool = new ShmPool(id, fd, size);
-        client.addResource(pool);
+        resource.getClient().addResource(pool);
     }
 }
 

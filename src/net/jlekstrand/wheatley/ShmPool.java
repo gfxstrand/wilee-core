@@ -30,7 +30,7 @@ public class ShmPool extends Resource implements wl_shm_pool.Requests
     }
 
     @Override
-	public void createBuffer(Client client, int id, int offset, int width,
+	public void createBuffer(Resource resource, int id, int offset, int width,
             int height, int stride, int format)
     {
         if (width < 0 || height < 0 || stride < 0 || offset < 0)
@@ -42,7 +42,7 @@ public class ShmPool extends Resource implements wl_shm_pool.Requests
         // Yeah, there's no error checking yet... That needs to be fixed
         ShmBuffer buffer = new ShmBuffer(id, this, offset, width, height,
                 stride, format);
-        client.addResource(buffer);
+        resource.getClient().addResource(buffer);
 
         ++refCount;
     }
@@ -62,14 +62,14 @@ public class ShmPool extends Resource implements wl_shm_pool.Requests
     }
 
     @Override
-    public void destroy(Client client)
+    public void destroy(Resource resource)
     {
         release();
         super.destroy();
     }
 
     @Override
-	public void resize(Client client, int size)
+	public void resize(Resource resource, int size)
     {
         try {
             pool.resize(size);

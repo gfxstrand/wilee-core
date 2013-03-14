@@ -8,6 +8,7 @@ import android.graphics.Region;
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.Resource;
 
 import org.freedesktop.wayland.protocol.wl_shell;
 import org.freedesktop.wayland.protocol.wl_surface;
@@ -55,7 +56,7 @@ class TilingShell implements Shell, Global.BindHandler
     }
 
     @Override
-    public void getShellSurface(Client client, int id,
+    public void getShellSurface(Resource resource, int id,
             wl_surface.Requests surfaceReq)
     {
         final ShellSurface ssurface = new ShellSurface(id, (Surface)surfaceReq);
@@ -67,7 +68,7 @@ class TilingShell implements Shell, Global.BindHandler
                 surfaces.remove(ssurface);
             }
         });
-        client.addResource(ssurface);
+        resource.getClient().addResource(ssurface);
     }
 }
 

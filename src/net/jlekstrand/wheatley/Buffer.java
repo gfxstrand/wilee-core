@@ -22,7 +22,7 @@ public class Buffer extends Resource implements wl_buffer.Requests
     }
 
     @Override
-	public void destroy(Client client)
+	public void destroy(Resource resource)
     {
         super.destroy();
     }

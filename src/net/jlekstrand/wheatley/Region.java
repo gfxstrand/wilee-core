@@ -23,20 +23,20 @@ class Region extends Resource implements wl_region.Requests
     }
 
     @Override
-	public void destroy(Client client)
+	public void destroy(Resource resource)
     {
         super.destroy();
     }
 
     @Override
-	public void add(Client client, int x, int y, int width, int height)
+	public void add(Resource resource, int x, int y, int width, int height)
     {
         androidRegion.op(new Rect(x, y, x + width, y + height),
                 android.graphics.Region.Op.UNION);
     }
 
     @Override
-	public void subtract(Client client, int x, int y, int width, int height)
+	public void subtract(Resource resource, int x, int y, int width, int height)
     {
         // Not sure if DIFFERENCE or REVERSE_DIFFERENCE is appropreate here
         androidRegion.op(new Rect(x, y, x + width, y + height),

@@ -8,6 +8,7 @@ import org.freedesktop.wayland.server.EventLoop;
 import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Resource;
 
 import org.freedesktop.wayland.protocol.wl_compositor;
 import org.freedesktop.wayland.protocol.wl_shm;
@@ -121,17 +122,17 @@ public class Compositor implements Global.BindHandler, wl_compositor.Requests
     }
 
     @Override
-    public void createSurface(Client client, int id)
+    public void createSurface(Resource resource, int id)
     {
         Surface surface = new Surface(id, this);
-        client.addResource(surface);
+        resource.getClient().addResource(surface);
     }
 
     @Override
-    public void createRegion(Client client, int id)
+    public void createRegion(Resource resource, int id)
     {
         Region region = new Region(id);
-        client.addResource(region);
+        resource.getClient().addResource(region);
     }
 }
 

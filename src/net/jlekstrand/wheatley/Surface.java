@@ -73,13 +73,14 @@ public class Surface extends Resource implements wl_surface.Requests
     }
 
     @Override
-	public void destroy(Client client)
+	public void destroy(Resource resource)
     {
         super.destroy();
     }
 
     @Override
-	public void attach(Client client, wl_buffer.Requests buffer, int x, int y)
+	public void attach(Resource resource, wl_buffer.Requests buffer,
+            int x, int y)
     {
         if (pending.buffer != null)
             pending.bufferDestroyListener.detach();
@@ -92,26 +93,26 @@ public class Surface extends Resource implements wl_surface.Requests
     }
 
     @Override
-	public void damage(Client client, int x, int y, int width, int height)
+	public void damage(Resource resource, int x, int y, int width, int height)
     {
         pending.damage.op(new Rect(x, y, width, height), Region.Op.UNION);
     }
 
     @Override
-	public void frame(Client client, int callbackID)
+	public void frame(Resource resource, int callbackID)
     {
         Callback callback = new Callback(callbackID);
-        client.addResource(callback);
+        resource.getClient().addResource(callback);
         pending.callbacks.add(callback);
     }
 
     @Override
-	public void setOpaqueRegion(Client client, wl_region.Requests region)
+	public void setOpaqueRegion(Resource resource, wl_region.Requests region)
     {
     }
 
     @Override
-	public void setInputRegion(Client client, wl_region.Requests region)
+	public void setInputRegion(Resource resource, wl_region.Requests region)
     {
         if (region != null) {
             net.jlekstrand.wheatley.Region inReg =
@@ -123,7 +124,7 @@ public class Surface extends Resource implements wl_surface.Requests
     }
 
     @Override
-	public void commit(Client client)
+	public void commit(Resource resource)
     {
         if (pending.buffer != current.buffer) {
             if (current.buffer != null) {
@@ -155,7 +156,7 @@ public class Surface extends Resource implements wl_surface.Requests
     }
 
     @Override
-	public void setBufferTransform(Client client, int transform)
+	public void setBufferTransform(Resource resource, int transform)
     {
         return;
     }

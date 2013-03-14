@@ -42,10 +42,10 @@ public class ShmBuffer extends Buffer
     }
 
     @Override
-    public void destroy(Client client)
+    public void destroy(Resource resource)
     {
         pool.release();
-        super.destroy(client);
+        super.destroy(resource);
     }
 }
 
