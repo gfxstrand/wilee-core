@@ -13,7 +13,7 @@ import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.protocol.wl_compositor;
 import org.freedesktop.wayland.protocol.wl_shm;
 
-public class Compositor implements Global.BindHandler, wl_compositor.Requests
+public class Compositor extends Global implements wl_compositor.Requests
 {
     private static final String LOG_PREFIX = "Compositor";
 
@@ -28,10 +28,11 @@ public class Compositor implements Global.BindHandler, wl_compositor.Requests
 
     public Compositor()
     {
+        super(wl_compositor.WAYLAND_INTERFACE);
         renderer = null;
 
         display = new Display();
-        display.addGlobal(wl_compositor.WAYLAND_INTERFACE, this);
+        display.addGlobal(this);
 
         try {
             jobExecutor = new EventLoopQueuedExecutor();
@@ -41,10 +42,10 @@ public class Compositor implements Global.BindHandler, wl_compositor.Requests
         }
 
         shm = new Shm();
-        display.addGlobal(shm.getGlobal());
+        display.addGlobal(shm);
 
         TilingShell tshell = new TilingShell();
-        display.addGlobal(tshell.getGlobal());
+        display.addGlobal(tshell);
         shell = tshell;
     }
 

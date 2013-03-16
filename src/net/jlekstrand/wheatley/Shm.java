@@ -7,14 +7,11 @@ import org.freedesktop.wayland.server.Resource;
 
 import org.freedesktop.wayland.protocol.wl_shm;
 
-class Shm implements Global.BindHandler, wl_shm.Requests
+class Shm extends Global implements wl_shm.Requests
 {
     public Shm()
-    { }
-
-    public Global getGlobal()
     {
-        return new Global(wl_shm.WAYLAND_INTERFACE, this);
+        super(wl_shm.WAYLAND_INTERFACE);
     }
 
     @Override

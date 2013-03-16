@@ -13,7 +13,7 @@ import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.protocol.wl_shell;
 import org.freedesktop.wayland.protocol.wl_surface;
 
-class TilingShell implements Shell, Global.BindHandler
+class TilingShell extends Global implements Shell
 {
     private static final String LOG_PREFIX = "TilingShell";
 
@@ -21,12 +21,9 @@ class TilingShell implements Shell, Global.BindHandler
 
     public TilingShell()
     {
-        surfaces = new LinkedList<ShellSurface>();
-    }
+        super(wl_shell.WAYLAND_INTERFACE);
 
-    public Global getGlobal()
-    {
-        return new Global(wl_shell.WAYLAND_INTERFACE, this);
+        surfaces = new LinkedList<ShellSurface>();
     }
 
     public void render(Renderer renderer)
