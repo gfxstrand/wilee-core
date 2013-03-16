@@ -25,12 +25,12 @@ class ShellSurface extends Resource implements wl_shell_surface.Requests
     }
 
     @Override
-    public void move(Resource resource, wl_seat.Requests seat, int serial)
+    public void move(Resource resource, Resource seat, int serial)
     {
     }
 
     @Override
-    public void resize(Resource resource, wl_seat.Requests seat, int serial,
+    public void resize(Resource resource, Resource seat, int serial,
             int edges)
     {
     }
@@ -41,25 +41,25 @@ class ShellSurface extends Resource implements wl_shell_surface.Requests
     }
 
     @Override
-    public void setTransient(Resource resource, wl_surface.Requests parent,
+    public void setTransient(Resource resource, Resource parent,
             int x, int y, int flags)
     {
     }
 
     @Override
     public void setFullscreen(Resource resource, int method, int framerate,
-            wl_output.Requests output)
+            Resource output)
     {
     }
 
     @Override
-    public void setPopup(Resource resource, wl_seat.Requests seat, int serial,
-            wl_surface.Requests parent, int x, int y, int flags)
+    public void setPopup(Resource resource, Resource seat, int serial,
+            Resource parent, int x, int y, int flags)
     {
     }
 
     @Override
-    public void setMaximized(Resource resource, wl_output.Requests output)
+    public void setMaximized(Resource resource, Resource output)
     {
     }
 

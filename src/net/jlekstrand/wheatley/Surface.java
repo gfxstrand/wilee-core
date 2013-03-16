@@ -79,13 +79,12 @@ public class Surface extends Resource implements wl_surface.Requests
     }
 
     @Override
-	public void attach(Resource resource, wl_buffer.Requests buffer,
-            int x, int y)
+	public void attach(Resource resource, Resource buffer, int x, int y)
     {
         if (pending.buffer != null)
             pending.bufferDestroyListener.detach();
 
-        pending.buffer = (Buffer)buffer;
+        pending.buffer = (Buffer)buffer.getData();
         pending.buffer.addDestroyListener(pending.bufferDestroyListener);
 
         pending.area = new Rect(x, y,
@@ -107,16 +106,16 @@ public class Surface extends Resource implements wl_surface.Requests
     }
 
     @Override
-	public void setOpaqueRegion(Resource resource, wl_region.Requests region)
+	public void setOpaqueRegion(Resource resource, Resource region)
     {
     }
 
     @Override
-	public void setInputRegion(Resource resource, wl_region.Requests region)
+	public void setInputRegion(Resource resource, Resource region)
     {
         if (region != null) {
             net.jlekstrand.wheatley.Region inReg =
-                    (net.jlekstrand.wheatley.Region)region;
+                    (net.jlekstrand.wheatley.Region)region.getData();
             pending.inputRegion = inReg.getRegion();
         } else {
             pending.inputRegion = null;
