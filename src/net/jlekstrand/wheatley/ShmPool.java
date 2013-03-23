@@ -7,14 +7,16 @@ import org.freedesktop.wayland.server.Resource;
 
 import org.freedesktop.wayland.protocol.wl_shm_pool;
 
-public class ShmPool extends Resource implements wl_shm_pool.Requests
+public class ShmPool implements wl_shm_pool.Requests
 {
+    public final Resource resource;
     private int refCount;
     private org.freedesktop.wayland.ShmPool pool;
 
-    public ShmPool(int id, int fd, int size)
+    public ShmPool(Client client, int id, int fd, int size)
     {
-        super(wl_shm_pool.WAYLAND_INTERFACE, id);
+        resource = client.addObject(wl_shm_pool.WAYLAND_INTERFACE, id, this);
+
         this.refCount = 1;
         try {
             this.pool = org.freedesktop.wayland.ShmPool.fromFileDescriptor(
@@ -40,9 +42,8 @@ public class ShmPool extends Resource implements wl_shm_pool.Requests
             throw new ArrayIndexOutOfBoundsException();
 
         // Yeah, there's no error checking yet... That needs to be fixed
-        ShmBuffer buffer = new ShmBuffer(id, this, offset, width, height,
+        new ShmBuffer(resource.getClient(), id, this, offset, width, height,
                 stride, format);
-        resource.getClient().addResource(buffer);
 
         ++refCount;
     }
@@ -65,7 +66,7 @@ public class ShmPool extends Resource implements wl_shm_pool.Requests
     public void destroy(Resource resource)
     {
         release();
-        super.destroy();
+        resource.destroy();
     }
 
     @Override

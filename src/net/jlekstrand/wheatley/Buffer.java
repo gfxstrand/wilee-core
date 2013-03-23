@@ -5,15 +5,16 @@ import org.freedesktop.wayland.server.Resource;
 
 import org.freedesktop.wayland.protocol.wl_buffer;
 
-public class Buffer extends Resource implements wl_buffer.Requests
+public class Buffer implements wl_buffer.Requests
 {
+    public final Resource resource;
     protected final int width;
     protected final int height;
     protected int refCount;
 
-    public Buffer(int id, int width, int height)
+    public Buffer(Client client, int id, int width, int height)
     {
-        super(wl_buffer.WAYLAND_INTERFACE, id);
+        resource = client.addObject(wl_buffer.WAYLAND_INTERFACE, id, this);
 
         this.width = width;
         this.height = height;
@@ -24,7 +25,7 @@ public class Buffer extends Resource implements wl_buffer.Requests
     @Override
 	public void destroy(Resource resource)
     {
-        super.destroy();
+        resource.destroy();
     }
 
     public int getWidth()
@@ -47,7 +48,7 @@ public class Buffer extends Resource implements wl_buffer.Requests
         --refCount;
 
         if (refCount == 0)
-            wl_buffer.postRelease(this);
+            wl_buffer.postRelease(resource);
     }
 }
 

@@ -7,13 +7,15 @@ import org.freedesktop.wayland.protocol.wl_region;
 
 import android.graphics.Rect;
 
-class Region extends Resource implements wl_region.Requests
+class Region implements wl_region.Requests
 {
-    android.graphics.Region androidRegion;
+    public final Resource resource;
+    private android.graphics.Region androidRegion;
 
-    public Region(int id)
+    public Region(Client client, int id)
     {
-        super(wl_region.WAYLAND_INTERFACE, id);
+        resource = client.addObject(wl_region.WAYLAND_INTERFACE, id, this);
+
         androidRegion = new android.graphics.Region();
     }
 
@@ -25,7 +27,7 @@ class Region extends Resource implements wl_region.Requests
     @Override
 	public void destroy(Resource resource)
     {
-        super.destroy();
+        resource.destroy();
     }
 
     @Override

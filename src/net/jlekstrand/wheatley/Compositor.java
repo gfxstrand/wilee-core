@@ -125,15 +125,13 @@ public class Compositor extends Global implements wl_compositor.Requests
     @Override
     public void createSurface(Resource resource, int id)
     {
-        Surface surface = new Surface(id, this);
-        resource.getClient().addResource(surface);
+        new Surface(resource.getClient(), id, this);
     }
 
     @Override
     public void createRegion(Resource resource, int id)
     {
-        Region region = new Region(id);
-        resource.getClient().addResource(region);
+        new Region(resource.getClient(), id);
     }
 }
 

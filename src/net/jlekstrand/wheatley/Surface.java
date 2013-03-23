@@ -13,8 +13,10 @@ import java.util.ArrayList;
 import android.graphics.Rect;
 import android.graphics.Region;
 
-public class Surface extends Resource implements wl_surface.Requests
+public class Surface implements wl_surface.Requests
 {
+    public final Resource resource;
+
     private static class State
     {
         public Buffer buffer;
@@ -43,9 +45,10 @@ public class Surface extends Resource implements wl_surface.Requests
     // These refer to pending Surface data that will get set on "commit"
     private Rect pendingBufferRect;
 
-    public Surface(int id, Compositor comp)
+    public Surface(Client client, int id, Compositor comp)
     {
-        super(wl_surface.WAYLAND_INTERFACE, id);
+        resource = client.addObject(wl_surface.WAYLAND_INTERFACE, id, this);
+
         this.id = id;
         this.comp = comp;
 
@@ -57,7 +60,6 @@ public class Surface extends Resource implements wl_surface.Requests
     {
         for (Callback callback : current.callbacks) {
             callback.done(serial);
-            callback.destroy();
         }
         current.callbacks.clear();
     }
@@ -75,7 +77,7 @@ public class Surface extends Resource implements wl_surface.Requests
     @Override
 	public void destroy(Resource resource)
     {
-        super.destroy();
+        resource.destroy();
     }
 
     @Override
@@ -85,7 +87,7 @@ public class Surface extends Resource implements wl_surface.Requests
             pending.bufferDestroyListener.detach();
 
         pending.buffer = (Buffer)buffer.getData();
-        pending.buffer.addDestroyListener(pending.bufferDestroyListener);
+        pending.buffer.resource.addDestroyListener(pending.bufferDestroyListener);
 
         pending.area = new Rect(x, y,
                 x + pending.buffer.getWidth(), y + pending.buffer.getHeight());
@@ -100,8 +102,7 @@ public class Surface extends Resource implements wl_surface.Requests
     @Override
 	public void frame(Resource resource, int callbackID)
     {
-        Callback callback = new Callback(callbackID);
-        resource.getClient().addResource(callback);
+        Callback callback = new Callback(resource.getClient(), callbackID);
         pending.callbacks.add(callback);
     }
 
@@ -136,7 +137,7 @@ public class Surface extends Resource implements wl_surface.Requests
 
             if (current.buffer != null) {
                 current.buffer.incrementReferenceCount();
-                current.buffer.addDestroyListener(  
+                current.buffer.resource.addDestroyListener(  
                         current.bufferDestroyListener);
             }
         }
@@ -151,7 +152,7 @@ public class Surface extends Resource implements wl_surface.Requests
 
         // FIXME: This should not be needed anymore, but my simple-shm build
         // still needs it
-        attach(null, current.buffer, 0, 0);
+        attach(null, current.buffer.resource, 0, 0);
     }
 
     @Override

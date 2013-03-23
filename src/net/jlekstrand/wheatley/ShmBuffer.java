@@ -15,10 +15,10 @@ public class ShmBuffer extends Buffer
 
     private final ShmPool pool;
 
-    public ShmBuffer(int id, ShmPool pool, int offset, int width, int height,
-            int stride, int format)
+    public ShmBuffer(Client client, int id, ShmPool pool, int offset,
+            int width, int height, int stride, int format)
     {
-        super(id, width, height);
+        super(client, id, width, height);
 
         this.offset = offset;
         this.stride = stride;

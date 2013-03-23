@@ -30,8 +30,7 @@ class Shm extends Global implements wl_shm.Requests
     @Override
 	public void createPool(Resource resource, int id, int fd, int size)
     {
-        ShmPool pool = new ShmPool(id, fd, size);
-        resource.getClient().addResource(pool);
+        new ShmPool(resource.getClient(), id, fd, size);
     }
 }
 

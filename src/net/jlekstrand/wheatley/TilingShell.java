@@ -56,17 +56,17 @@ class TilingShell extends Global implements Shell
     public void getShellSurface(Resource resource, int id,
             Resource surfaceRes)
     {
-        final ShellSurface ssurface =
-                new ShellSurface(id, (Surface)surfaceRes.getData());
+        final ShellSurface ssurface = new ShellSurface(resource.getClient(),
+                id, (Surface)surfaceRes.getData());
+
         surfaces.add(ssurface);
-        ssurface.addDestroyListener(new Listener() {
+        ssurface.resource.addDestroyListener(new Listener() {
             @Override
             public void onNotify()
             {
                 surfaces.remove(ssurface);
             }
         });
-        resource.getClient().addResource(ssurface);
     }
 }
 

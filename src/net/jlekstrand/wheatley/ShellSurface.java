@@ -8,13 +8,15 @@ import org.freedesktop.wayland.protocol.wl_surface;
 import org.freedesktop.wayland.protocol.wl_seat;
 import org.freedesktop.wayland.protocol.wl_output;
 
-class ShellSurface extends Resource implements wl_shell_surface.Requests
+class ShellSurface implements wl_shell_surface.Requests
 {
+    public final Resource resource;
     public final Surface surface;
 
-    public ShellSurface(int id, Surface surface)
+    public ShellSurface(Client client, int id, Surface surface)
     {
-        super(wl_shell_surface.WAYLAND_INTERFACE, id);
+        resource = client.addObject(
+                wl_shell_surface.WAYLAND_INTERFACE, id, this);
 
         this.surface = surface;
     }
