@@ -7,10 +7,12 @@ import org.freedesktop.wayland.protocol.wl_keyboard;
 
 public class Keyboard
 {
+    final Seat seat;
     final ClientResourceMap resources;
 
-    public Keyboard()
+    public Keyboard(Seat seat)
     {
+        this.seat = seat;
         resources = new ClientResourceMap();
     }
 

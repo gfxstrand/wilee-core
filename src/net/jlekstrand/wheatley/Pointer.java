@@ -8,10 +8,12 @@ import org.freedesktop.wayland.protocol.wl_pointer;
 
 public class Pointer implements wl_pointer.Requests
 {
+    final Seat seat;
     final ClientResourceMap resources;
 
-    public Pointer()
+    public Pointer(Seat seat)
     {
+        this.seat = seat;
         resources = new ClientResourceMap();
     }
 

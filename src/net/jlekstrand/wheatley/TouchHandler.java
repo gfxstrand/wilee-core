@@ -1,6 +1,7 @@
 package net.jlekstrand.wheatley;
 
 import java.util.HashMap;
+import java.util.ArrayList;
 
 import org.freedesktop.wayland.Fixed;
 import org.freedesktop.wayland.server.Resource;
@@ -14,8 +15,8 @@ public class TouchHandler
     {
         public final int id;
 
-        private Surface surface;
-        private Resource resource;
+        public Surface surface;
+        public wl_touch.Resource resource;
 
         public Finger(int id)
         {
@@ -24,8 +25,9 @@ public class TouchHandler
 
         public void handleDown(int serial, int time, Fixed x, Fixed y)
         {
-            // surface = shell.getSurfaceAt(x.asInt(), y.asInt());
-            // resource = touchResources.get(surface.resource.getClient());
+            surface = seat.compositor.getSurfaceAt(x.asInt(), y.asInt());
+            if (surface == null)
+                return;
 
             resource = (wl_touch.Resource)resources.getResource(
                     surface.resource.getClient());
@@ -35,21 +37,30 @@ public class TouchHandler
 
         public void handleMotion(int time, Fixed x, Fixed y)
         {
-            wl_touch.postMotion(resource, time, id, x, y);
+            if (resource == null)
+                return;
+
+            resource.motion(time, id, x, y);
         }
 
         public void handleUp(int serial, int time)
         {
-            wl_touch.postUp(resource, serial, time, id);
+            if (resource == null)
+                return;
+
+            resource.up(serial, time, id);
         }
     }
 
+    final Seat seat;
     final ClientResourceMap resources;
-    private HashMap<Integer, Finger> fingers;
+    final private HashMap<Integer, Finger> fingers;
 
-    public TouchHandler()
+    public TouchHandler(Seat seat)
     {
+        this.seat = seat;
         resources = new ClientResourceMap();
+        fingers = new HashMap<Integer, Finger>();
     }
 
     public void bindClient(Client client, int id)
@@ -57,27 +68,51 @@ public class TouchHandler
         resources.addResource(new wl_touch.Resource(client, id, null));
     }
 
-    void handleDown(int serial, int time, int id, Fixed x, Fixed y)
+    public void handleDown(int serial, int time, int id, Fixed x, Fixed y)
     {
-        fingers.get(id).handleDown(serial, time, x, y);
+        final Finger finger = new Finger(id);
+        fingers.put(id, finger);
+        finger.handleDown(serial, time, x, y);
     }
 
-    void handleMotion(int time, int id, Fixed x, Fixed y)
+    public void handleMotion(int time, int id, Fixed x, Fixed y)
     {
-        fingers.get(id).handleMotion(time, x, y);
+        final Finger finger = fingers.get(id);
+        if (finger != null)
+            finger.handleMotion(time, x, y);
     }
 
-    void handleUp(int serial, int time, int id)
+    public void handleUp(int serial, int time, int id)
     {
-        fingers.get(id).handleUp(serial, time);
+        final Finger finger = fingers.get(id);
+        if (finger != null)
+            finger.handleUp(serial, time);
     }
 
-    void handleFrame()
+    public void handleFrame()
     {
+        final ArrayList<Resource> activeResources = new ArrayList<Resource>();
+
+        for (Finger finger : fingers.values())
+            if (finger.resource != null &&
+                    ! activeResources.contains(finger.resource))
+                activeResources.add(finger.resource);
+
+        for (Resource resource : activeResources)
+            ((wl_touch.Resource)resource).frame();
     }
 
-    void handleCancel()
+    public void handleCancel()
     {
+        final ArrayList<Resource> activeResources = new ArrayList<Resource>();
+
+        for (Finger finger : fingers.values())
+            if (finger.resource != null &&
+                    ! activeResources.contains(finger.resource))
+                activeResources.add(finger.resource);
+
+        for (Resource resource : activeResources)
+            ((wl_touch.Resource)resource).cancel();
     }
 }
 
