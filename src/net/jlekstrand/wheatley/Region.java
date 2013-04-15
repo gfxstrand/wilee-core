@@ -9,12 +9,12 @@ import android.graphics.Rect;
 
 class Region implements wl_region.Requests
 {
-    public final Resource resource;
+    public final wl_region.Resource resource;
     private android.graphics.Region androidRegion;
 
     public Region(Client client, int id)
     {
-        resource = client.addObject(wl_region.WAYLAND_INTERFACE, id, this);
+        resource = new wl_region.Resource(client, id, this);
 
         androidRegion = new android.graphics.Region();
     }
@@ -25,20 +25,22 @@ class Region implements wl_region.Requests
     }
 
     @Override
-	public void destroy(Resource resource)
+	public void destroy(wl_region.Resource resource)
     {
         resource.destroy();
     }
 
     @Override
-	public void add(Resource resource, int x, int y, int width, int height)
+	public void add(wl_region.Resource resource, int x, int y, int width,
+            int height)
     {
         androidRegion.op(new Rect(x, y, x + width, y + height),
                 android.graphics.Region.Op.UNION);
     }
 
     @Override
-	public void subtract(Resource resource, int x, int y, int width, int height)
+	public void subtract(wl_region.Resource resource, int x, int y, int width,
+            int height)
     {
         // Not sure if DIFFERENCE or REVERSE_DIFFERENCE is appropreate here
         androidRegion.op(new Rect(x, y, x + width, y + height),

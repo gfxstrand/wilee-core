@@ -15,7 +15,7 @@ import android.graphics.Region;
 
 public class Surface implements wl_surface.Requests
 {
-    public final Resource resource;
+    public final wl_surface.Resource resource;
 
     private static class State
     {
@@ -47,7 +47,7 @@ public class Surface implements wl_surface.Requests
 
     public Surface(Client client, int id, Compositor comp)
     {
-        resource = client.addObject(wl_surface.WAYLAND_INTERFACE, id, this);
+        resource = new wl_surface.Resource(client, id, this);
 
         this.id = id;
         this.comp = comp;
@@ -75,13 +75,13 @@ public class Surface implements wl_surface.Requests
     }
 
     @Override
-	public void destroy(Resource resource)
+	public void destroy(wl_surface.Resource resource)
     {
         resource.destroy();
     }
 
     @Override
-	public void attach(Resource resource, Resource buffer, int x, int y)
+	public void attach(wl_surface.Resource resource, Resource buffer, int x, int y)
     {
         if (pending.buffer != null)
             pending.bufferDestroyListener.detach();
@@ -94,25 +94,25 @@ public class Surface implements wl_surface.Requests
     }
 
     @Override
-	public void damage(Resource resource, int x, int y, int width, int height)
+	public void damage(wl_surface.Resource resource, int x, int y, int width, int height)
     {
         pending.damage.op(new Rect(x, y, width, height), Region.Op.UNION);
     }
 
     @Override
-	public void frame(Resource resource, int callbackID)
+	public void frame(wl_surface.Resource resource, int callbackID)
     {
         Callback callback = new Callback(resource.getClient(), callbackID);
         pending.callbacks.add(callback);
     }
 
     @Override
-	public void setOpaqueRegion(Resource resource, Resource region)
+	public void setOpaqueRegion(wl_surface.Resource resource, Resource region)
     {
     }
 
     @Override
-	public void setInputRegion(Resource resource, Resource region)
+	public void setInputRegion(wl_surface.Resource resource, Resource region)
     {
         if (region != null) {
             net.jlekstrand.wheatley.Region inReg =
@@ -124,7 +124,7 @@ public class Surface implements wl_surface.Requests
     }
 
     @Override
-	public void commit(Resource resource)
+	public void commit(wl_surface.Resource resource)
     {
         if (pending.buffer != current.buffer) {
             if (current.buffer != null) {
@@ -156,7 +156,7 @@ public class Surface implements wl_surface.Requests
     }
 
     @Override
-	public void setBufferTransform(Resource resource, int transform)
+	public void setBufferTransform(wl_surface.Resource resource, int transform)
     {
         return;
     }

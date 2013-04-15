@@ -10,68 +10,69 @@ import org.freedesktop.wayland.protocol.wl_output;
 
 class ShellSurface implements wl_shell_surface.Requests
 {
-    public final Resource resource;
+    public final wl_shell_surface.Resource resource;
     public final Surface surface;
 
     public ShellSurface(Client client, int id, Surface surface)
     {
-        resource = client.addObject(
-                wl_shell_surface.WAYLAND_INTERFACE, id, this);
+        resource = new wl_shell_surface.Resource(client, id, this);
 
         this.surface = surface;
     }
 
     @Override
-    public void pong(Resource resource, int serial)
+    public void pong(wl_shell_surface.Resource resource, int serial)
     {
     }
 
     @Override
-    public void move(Resource resource, Resource seat, int serial)
+    public void move(wl_shell_surface.Resource resource, Resource seat,
+            int serial)
     {
     }
 
     @Override
-    public void resize(Resource resource, Resource seat, int serial,
-            int edges)
+    public void resize(wl_shell_surface.Resource resource, Resource seat,
+            int serial, int edges)
     {
     }
 
     @Override
-    public void setToplevel(Resource resource)
+    public void setToplevel(wl_shell_surface.Resource resource)
     {
     }
 
     @Override
-    public void setTransient(Resource resource, Resource parent,
-            int x, int y, int flags)
-    {
-    }
-
-    @Override
-    public void setFullscreen(Resource resource, int method, int framerate,
-            Resource output)
-    {
-    }
-
-    @Override
-    public void setPopup(Resource resource, Resource seat, int serial,
+    public void setTransient(wl_shell_surface.Resource resource,
             Resource parent, int x, int y, int flags)
     {
     }
 
     @Override
-    public void setMaximized(Resource resource, Resource output)
+    public void setFullscreen(wl_shell_surface.Resource resource, int method,
+            int framerate, Resource output)
     {
     }
 
     @Override
-    public void setTitle(Resource resource, String title)
+    public void setPopup(wl_shell_surface.Resource resource, Resource seat,
+            int serial, Resource parent, int x, int y, int flags)
     {
     }
 
     @Override
-    public void setClass(Resource resource, String class_)
+    public void setMaximized(wl_shell_surface.Resource resource,
+            Resource output)
+    {
+    }
+
+    @Override
+    public void setTitle(wl_shell_surface.Resource resource, String title)
+    {
+    }
+
+    @Override
+    public void setClass(wl_shell_surface.Resource resource, String class_)
     {
     }
 }

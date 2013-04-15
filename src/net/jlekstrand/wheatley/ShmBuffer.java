@@ -6,6 +6,7 @@ import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Resource;
 
 import org.freedesktop.wayland.protocol.wl_shm_pool;
+import org.freedesktop.wayland.protocol.wl_buffer;
 
 public class ShmBuffer extends Buffer
 {
@@ -42,7 +43,7 @@ public class ShmBuffer extends Buffer
     }
 
     @Override
-    public void destroy(Resource resource)
+    public void destroy(wl_buffer.Resource resource)
     {
         pool.release();
         super.destroy(resource);

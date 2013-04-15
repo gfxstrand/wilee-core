@@ -37,21 +37,28 @@ public class Seat extends Global implements wl_seat.Requests
     }
 
     @Override
-	public void getKeyboard(Resource resource, int id)
+    public void bindClient(Client client, int version, int id)
+    {
+        wl_seat.Resource res = new wl_seat.Resource(client, id, this);
+        res.capabilities(capabilities);
+    }
+
+    @Override
+	public void getKeyboard(wl_seat.Resource resource, int id)
     {
         if (keyboard != null)
             keyboard.bindClient(resource.getClient(), id);
     }
 
     @Override
-	public void getTouch(Resource resource, int id)
+	public void getTouch(wl_seat.Resource resource, int id)
     {
         if (touchHandler != null)
             touchHandler.bindClient(resource.getClient(), id);
     }
 
     @Override
-    public void getPointer(Resource resource, int id)
+    public void getPointer(wl_seat.Resource resource, int id)
     {
         if (pointer != null)
             pointer.bindClient(resource.getClient(), id);

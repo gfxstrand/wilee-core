@@ -17,7 +17,8 @@ public class Compositor extends Global implements wl_compositor.Requests
 {
     private static final String LOG_PREFIX = "Compositor";
 
-    protected Display display;
+    public final Display display;
+
     protected Shm shm;
     protected Shell shell;
     protected Renderer renderer;
@@ -25,6 +26,9 @@ public class Compositor extends Global implements wl_compositor.Requests
     private boolean render_pending;
     private EventLoopQueuedExecutor jobExecutor;
     private Thread compositorThread;
+
+    // FIXME:
+    private Surface myTmpSurface;
 
     public Compositor()
     {
@@ -122,14 +126,22 @@ public class Compositor extends Global implements wl_compositor.Requests
             requestRender();
     }
 
-    @Override
-    public void createSurface(Resource resource, int id)
+    public Surface getSurfaceAt(int x, int y)
     {
-        new Surface(resource.getClient(), id, this);
+        if (shell != null)
+            return myTmpSurface;
+        else
+            return null;
     }
 
     @Override
-    public void createRegion(Resource resource, int id)
+    public void createSurface(wl_compositor.Resource resource, int id)
+    {
+        myTmpSurface = new Surface(resource.getClient(), id, this);
+    }
+
+    @Override
+    public void createRegion(wl_compositor.Resource resource, int id)
     {
         new Region(resource.getClient(), id);
     }

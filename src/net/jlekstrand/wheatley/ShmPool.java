@@ -9,13 +9,13 @@ import org.freedesktop.wayland.protocol.wl_shm_pool;
 
 public class ShmPool implements wl_shm_pool.Requests
 {
-    public final Resource resource;
+    public final wl_shm_pool.Resource resource;
     private int refCount;
     private org.freedesktop.wayland.ShmPool pool;
 
     public ShmPool(Client client, int id, int fd, int size)
     {
-        resource = client.addObject(wl_shm_pool.WAYLAND_INTERFACE, id, this);
+        resource = new wl_shm_pool.Resource(client, id, this);
 
         this.refCount = 1;
         try {
@@ -32,8 +32,8 @@ public class ShmPool implements wl_shm_pool.Requests
     }
 
     @Override
-	public void createBuffer(Resource resource, int id, int offset, int width,
-            int height, int stride, int format)
+	public void createBuffer(wl_shm_pool.Resource resource, int id,
+            int offset, int width, int height, int stride, int format)
     {
         if (width < 0 || height < 0 || stride < 0 || offset < 0)
             throw new ArrayIndexOutOfBoundsException();
@@ -63,14 +63,14 @@ public class ShmPool implements wl_shm_pool.Requests
     }
 
     @Override
-    public void destroy(Resource resource)
+    public void destroy(wl_shm_pool.Resource resource)
     {
         release();
         resource.destroy();
     }
 
     @Override
-	public void resize(Resource resource, int size)
+	public void resize(wl_shm_pool.Resource resource, int size)
     {
         try {
             pool.resize(size);

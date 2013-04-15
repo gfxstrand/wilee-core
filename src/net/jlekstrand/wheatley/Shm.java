@@ -17,18 +17,18 @@ class Shm extends Global implements wl_shm.Requests
     @Override
     public void bindClient(Client client, int version, int id)
     {
-        Resource res = client.addObject(wl_shm.WAYLAND_INTERFACE, id, this);
+        wl_shm.Resource res = new wl_shm.Resource(client, id, this);
         publishFormats(res);
     }
 
-    private void publishFormats(Resource res)
+    private void publishFormats(wl_shm.Resource res)
     {
-        wl_shm.postFormat(res, wl_shm.FORMAT_ARGB8888);
-        wl_shm.postFormat(res, wl_shm.FORMAT_XRGB8888);
+        res.format(wl_shm.FORMAT_ARGB8888);
+        res.format(wl_shm.FORMAT_XRGB8888);
     }
 
     @Override
-	public void createPool(Resource resource, int id, int fd, int size)
+	public void createPool(wl_shm.Resource resource, int id, int fd, int size)
     {
         new ShmPool(resource.getClient(), id, fd, size);
     }

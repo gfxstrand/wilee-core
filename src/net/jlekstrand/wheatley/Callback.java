@@ -7,16 +7,16 @@ import org.freedesktop.wayland.protocol.wl_callback;
 
 class Callback implements wl_callback.Requests
 {
-    public final Resource resource;
+    public final wl_callback.Resource resource;
 
     public Callback(Client client, int id)
     {
-        resource = client.addObject(wl_callback.WAYLAND_INTERFACE, id, this);
+        resource = new wl_callback.Resource(client, id, this);
     }
 
     public void done(int serial)
     {
-        wl_callback.postDone(resource, serial);
+        resource.done(serial);
         resource.destroy();
     }
 }

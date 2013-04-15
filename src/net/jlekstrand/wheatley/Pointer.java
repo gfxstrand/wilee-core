@@ -17,13 +17,15 @@ public class Pointer implements wl_pointer.Requests
 
     public void bindClient(Client client, int id)
     {
-        resources.addResource(client.addObject(
-                wl_pointer.WAYLAND_INTERFACE, id, this));
+        resources.addResource(new wl_pointer.Resource(client, id, this));
     }
 
     @Override
-    public void setCursor(Resource resource, int serial, Resource surface,
-            Fixed hotspot_x, Fixed hotspot_y)
+    public void setCursor(wl_pointer.Resource resource, int serial,
+            Resource surface, Fixed hotspot_x, Fixed hotspot_y)
+    { }
+
+    public void handleMotion(int time, Fixed x, Fixed y)
     { }
 }
 

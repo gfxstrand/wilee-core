@@ -53,7 +53,7 @@ class TilingShell extends Global implements Shell
     }
 
     @Override
-    public void getShellSurface(Resource resource, int id,
+    public void getShellSurface(wl_shell.Resource resource, int id,
             Resource surfaceRes)
     {
         final ShellSurface ssurface = new ShellSurface(resource.getClient(),

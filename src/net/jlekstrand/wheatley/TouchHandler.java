@@ -27,8 +27,10 @@ public class TouchHandler
             // surface = shell.getSurfaceAt(x.asInt(), y.asInt());
             // resource = touchResources.get(surface.resource.getClient());
 
-            wl_touch.postDown(resource, serial, time,
-                    surface.resource, id, x, y);
+            resource = (wl_touch.Resource)resources.getResource(
+                    surface.resource.getClient());
+
+            resource.down(serial, time, surface.resource, id, x, y);
         }
 
         public void handleMotion(int time, Fixed x, Fixed y)
@@ -52,8 +54,7 @@ public class TouchHandler
 
     public void bindClient(Client client, int id)
     {
-        resources.addResource(client.addObject(
-                wl_touch.WAYLAND_INTERFACE, id, null));
+        resources.addResource(new wl_touch.Resource(client, id, null));
     }
 
     void handleDown(int serial, int time, int id, Fixed x, Fixed y)
