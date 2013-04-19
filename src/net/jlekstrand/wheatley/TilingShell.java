@@ -2,8 +2,6 @@ package net.jlekstrand.wheatley;
 
 import java.util.LinkedList;
 
-import android.util.Log;
-
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Listener;

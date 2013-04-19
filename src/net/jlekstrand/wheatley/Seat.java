@@ -1,7 +1,5 @@
 package net.jlekstrand.wheatley;
 
-import android.util.Log;
-
 import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Global;
