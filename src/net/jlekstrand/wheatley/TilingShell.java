@@ -3,7 +3,6 @@ package net.jlekstrand.wheatley;
 import java.util.LinkedList;
 
 import android.util.Log;
-import android.graphics.Region;
 
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.Client;

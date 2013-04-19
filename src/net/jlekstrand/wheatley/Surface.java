@@ -10,9 +10,6 @@ import org.freedesktop.wayland.protocol.wl_buffer;
 
 import java.util.ArrayList;
 
-import android.graphics.Rect;
-import android.graphics.Region;
-
 public class Surface implements wl_surface.Requests
 {
     public final wl_surface.Resource resource;
@@ -28,7 +25,7 @@ public class Surface implements wl_surface.Requests
                 detach();
             }
         };
-        public Region damage = new Region();
+        public Region damage = null;
 
         public Region inputRegion;
 
@@ -53,6 +50,7 @@ public class Surface implements wl_surface.Requests
         this.comp = comp;
 
         current = new State();
+        current.damage = comp.regionFactory.createRegion();
         pending = new State();
     }
 
@@ -96,7 +94,10 @@ public class Surface implements wl_surface.Requests
     @Override
 	public void damage(wl_surface.Resource resource, int x, int y, int width, int height)
     {
-        pending.damage.op(new Rect(x, y, width, height), Region.Op.UNION);
+        if (pending.damage == null)
+            pending.damage = comp.regionFactory.createRegion();
+
+        pending.damage.add(x, y, x + width, y + height);
     }
 
     @Override
@@ -115,9 +116,9 @@ public class Surface implements wl_surface.Requests
 	public void setInputRegion(wl_surface.Resource resource, Resource region)
     {
         if (region != null) {
-            net.jlekstrand.wheatley.Region inReg =
-                    (net.jlekstrand.wheatley.Region)region.getData();
-            pending.inputRegion = inReg.getRegion();
+            net.jlekstrand.wheatley.ClientRegion cReg =
+                    (net.jlekstrand.wheatley.ClientRegion)region.getData();
+            pending.inputRegion = cReg.region.clone();
         } else {
             pending.inputRegion = null;
         }
@@ -142,9 +143,13 @@ public class Surface implements wl_surface.Requests
             }
         }
 
-        current.damage.op(pending.damage, Region.Op.UNION);
-        comp.surfaceDamaged(this, pending.damage);
-        current.inputRegion = pending.inputRegion;
+        if (pending.damage != null) {
+            current.damage.add(pending.damage);
+            comp.surfaceDamaged(this, pending.damage);
+        }
+
+        if (pending.inputRegion!= null)
+            current.inputRegion = pending.inputRegion.clone();
 
         current.callbacks.addAll(pending.callbacks);
 

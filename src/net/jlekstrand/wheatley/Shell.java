@@ -1,7 +1,5 @@
 package net.jlekstrand.wheatley;
 
-import android.graphics.Region;
-
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.protocol.wl_shell;
 

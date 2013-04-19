@@ -18,6 +18,7 @@ public class Compositor extends Global implements wl_compositor.Requests
     private static final String LOG_PREFIX = "Compositor";
 
     public final Display display;
+    final Region.Factory regionFactory;
 
     protected Shm shm;
     protected Shell shell;
@@ -30,9 +31,14 @@ public class Compositor extends Global implements wl_compositor.Requests
     // FIXME:
     private Surface myTmpSurface;
 
-    public Compositor()
+    public Compositor(Region.Factory regionFactory)
     {
         super(wl_compositor.WAYLAND_INTERFACE);
+
+        if (regionFactory == null)
+            throw new NullPointerException("Region factory may not be null");
+        this.regionFactory = regionFactory;
+
         renderer = null;
 
         display = new Display();
@@ -118,7 +124,7 @@ public class Compositor extends Global implements wl_compositor.Requests
         }
     }
 
-    public void surfaceDamaged(Surface surface, android.graphics.Region damage)
+    public void surfaceDamaged(Surface surface, Region damage)
     {
         boolean needs_redraw = shell.surfaceDamaged(surface, damage);
 
@@ -143,7 +149,7 @@ public class Compositor extends Global implements wl_compositor.Requests
     @Override
     public void createRegion(wl_compositor.Resource resource, int id)
     {
-        new Region(resource.getClient(), id);
+        new ClientRegion(resource.getClient(), id, regionFactory);
     }
 }
 
