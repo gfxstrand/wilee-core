@@ -26,7 +26,7 @@ public class POSIX
     }
 
     static {
-        System.loadLibrary("wheatley-lib");
+        System.loadLibrary("wheatley-core");
     }
 }
 
