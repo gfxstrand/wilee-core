@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright © 2012-2013 Jason Ekstrand.
+ 
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that copyright
+notice and this permission notice appear in supporting documentation, and
+that the name of the copyright holders not be used in advertising or
+publicity pertaining to distribution of the software without specific,
+written prior permission.  The copyright holders make no representations
+about the suitability of this software for any purpose.  It is provided "as
+is" without express or implied warranty.
+
+THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+OF THIS SOFTWARE.
+-->
+<project name="wheatley-core" default="release">
+    <property name="source.dir" value="${basedir}/src" />
+    <property name="build.dir" value="${basedir}/build" />
+    <property name="classes.dir" value="${build.dir}/classes" />
+    <property name="jni.dir" value="${basedir}/jni" />
+
+    <path id="wayland.classpath">
+        <pathelement path="../wayland-java/wayland-java.jar" />
+    </path>
+
+    <target name="jni">
+        <exec executable="make" dir="${jni.dir}" failonerror="true">
+            <env key="BUILD_DIR" value="${build.dir}" />
+        </exec>
+        <copy file="${build.dir}/libwheatley-core.so" todir="${classes.dir}" />
+    </target>
+
+    <target name="java">
+        <mkdir dir="${classes.dir}" />
+        <javac srcdir="${source.dir}" destdir="${classes.dir}"
+                includeantruntime="false">
+            <classpath refid="wayland.classpath" />
+        </javac>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}" />
+    </target>
+
+    <target name="jar" description="Package the library" depends="java,jni">
+        <jar destfile="${ant.project.name}.jar" basedir="${classes.dir}"/>
+    </target>
+
+    <target name="release" depends="jar" />
+</project>
+
