@@ -20,5 +20,6 @@
 
 WHEATLEY_CORE_SRC := \
 	src/jni_util.c \
+	src/pixman_region.c \
 	src/posix.c
 

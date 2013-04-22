@@ -25,8 +25,11 @@ SRC_DIR ?= src
 OBJECT_DIR := $(BUILD_DIR)/objects
 
 JNI_CFLAGS := -I/lib/jvm/java/include -I/lib/jvm/java/include/linux
+PIXMAN_CFLAGS := $(shell pkg-config --cflags pixman-1)
+PIXMAN_LDFLAGS := $(shell pkg-config --libs pixman-1)
 
-CFLAGS := -g -fPIC $(JNI_CFLAGS)
+CFLAGS := -g -fPIC $(JNI_CFLAGS) $(PIXMAN_CFLAGS)
+LDFLAGS := $(PIXMAN_LDFLAGS)
 
 CORE_OBJECTS := $(foreach file, $(WHEATLEY_CORE_SRC), \
 		$(patsubst $(SRC_DIR)/%.c, $(OBJECT_DIR)/%.o, $(file)))
@@ -40,7 +43,7 @@ $(OBJECT_DIR)%.o: $(SRC_DIR)/%.c $(OBJECT_DIR)
 	gcc $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/libwheatley-core.so: $(CORE_OBJECTS)
-	gcc -shared -o $@ $^ $(CORE_LDFLAGS)
+	gcc -shared -o $@ $^ $(LDFLAGS)
 
 .PHONY: clean
 clean:

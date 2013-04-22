@@ -71,7 +71,7 @@ public class Surface implements wl_surface.Requests
         this.comp = comp;
 
         current = new State();
-        current.damage = comp.regionFactory.createRegion();
+        current.damage = new Region();
         pending = new State();
     }
 
@@ -115,10 +115,11 @@ public class Surface implements wl_surface.Requests
     @Override
 	public void damage(wl_surface.Resource resource, int x, int y, int width, int height)
     {
+        Rect r = new Rect(x, y, x + width, y + height);
         if (pending.damage == null)
-            pending.damage = comp.regionFactory.createRegion();
-
-        pending.damage.add(x, y, x + width, y + height);
+            pending.damage = new Region(r);
+        else
+            pending.damage = pending.damage.add(r);
     }
 
     @Override
@@ -139,7 +140,7 @@ public class Surface implements wl_surface.Requests
         if (region != null) {
             net.jlekstrand.wheatley.ClientRegion cReg =
                     (net.jlekstrand.wheatley.ClientRegion)region.getData();
-            pending.inputRegion = cReg.region.clone();
+            pending.inputRegion = cReg.getRegion();
         } else {
             pending.inputRegion = null;
         }
@@ -170,7 +171,7 @@ public class Surface implements wl_surface.Requests
         }
 
         if (pending.inputRegion!= null)
-            current.inputRegion = pending.inputRegion.clone();
+            current.inputRegion = pending.inputRegion;
 
         current.callbacks.addAll(pending.callbacks);
 

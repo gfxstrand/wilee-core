@@ -21,19 +21,34 @@
  */
 package net.jlekstrand.wheatley;
 
-public class Rect
+final class PixmanRegion
 {
-    public int left;
-    public int top;
-    public int right;
-    public int bottom;
+    static native long create();
+    static native long create_rect(int x, int y, int width, int height);
+    static native long clone(long reg);
+    static native void destroy(long ptr);
+    static native void translate(long ptr, int x, int y);
+    static native void copy(long dest, long src);
+    static native void intersect(long new_reg, long reg1, long reg2);
+    static native void union(long new_reg, long reg1, long reg2);
+    static native void union_rect(long dest, long source,
+            int x, int y, int width, int height);
+    static native void intersect_rect(long dest, long source,
+            int x, int y, int width, int height);
+    static native void subtract(long reg_d, long reg_m, long reg_s);
+    static native void inverse(long dest, long src,
+            int x1, int y1, int x2, int y2);
+    static native boolean contains_point(long reg, int x, int y);
+    static native int n_rects(long reg);
+    static native Rect get_rect(long region, int idx);
+    static native boolean equal(long reg1, long reg2);
 
-    public Rect(int left, int top, int right, int bottom)
-    {
-        this.left = left;
-        this.top = top;
-        this.right = right;
-        this.bottom = bottom;
+    private static native void initializeJNI();
+
+    static {
+        System.loadLibrary("pixman-1");
+        System.loadLibrary("wheatley-core");
+        initializeJNI();
     }
 }
 

@@ -28,12 +28,18 @@ import org.freedesktop.wayland.protocol.wl_region;
 class ClientRegion implements wl_region.Requests
 {
     public final wl_region.Resource resource;
-    public final Region region;
+    Region region;
 
-    public ClientRegion(Client client, int id, Region.Factory factory)
+    public ClientRegion(Client client, int id)
     {
         resource = new wl_region.Resource(client, id, this);
-        region = factory.createRegion();
+        region = new Region();
+    }
+
+    public Region
+    getRegion()
+    {
+        return region;
     }
 
     @Override
@@ -46,14 +52,14 @@ class ClientRegion implements wl_region.Requests
 	public void add(wl_region.Resource resource, int x, int y, int width,
             int height)
     {
-        region.add(x, y, width, height);
+        region = region.add(new Rect(x, y, x + width, y + height));
     }
 
     @Override
 	public void subtract(wl_region.Resource resource, int x, int y, int width,
             int height)
     {
-        region.subtract(x, y, width, height);
+        region = region.subtract(new Rect(x, y, x + width, y + height));
     }
 }
 
