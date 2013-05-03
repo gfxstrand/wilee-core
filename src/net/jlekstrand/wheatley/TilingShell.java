@@ -25,7 +25,7 @@ import java.util.LinkedList;
 
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Resource;
 
 import org.freedesktop.wayland.protocol.wl_shell;
@@ -78,9 +78,9 @@ class TilingShell extends Global implements Shell
                 id, (Surface)surfaceRes.getData());
 
         surfaces.add(ssurface);
-        ssurface.resource.addDestroyListener(new Listener() {
+        ssurface.resource.addDestroyListener(new DestroyListener() {
             @Override
-            public void onNotify()
+            public void onDestroy()
             {
                 surfaces.remove(ssurface);
             }

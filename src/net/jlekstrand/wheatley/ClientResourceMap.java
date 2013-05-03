@@ -23,7 +23,7 @@ package net.jlekstrand.wheatley;
 
 import java.util.HashMap;
 
-import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.server.Client;
 
@@ -42,8 +42,8 @@ class ClientResourceMap
 
         resources.put(client, resource);
 
-        resource.addDestroyListener(new Listener () {
-            public void onNotify()
+        resource.addDestroyListener(new DestroyListener () {
+            public void onDestroy()
             {
                 removeResource(client);
             }

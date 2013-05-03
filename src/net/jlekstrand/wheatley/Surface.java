@@ -23,7 +23,7 @@ package net.jlekstrand.wheatley;
 
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Resource;
-import org.freedesktop.wayland.server.Listener;
+import org.freedesktop.wayland.server.DestroyListener;
 
 import org.freedesktop.wayland.protocol.wl_surface;
 import org.freedesktop.wayland.protocol.wl_region;
@@ -39,11 +39,10 @@ public class Surface implements wl_surface.Requests
     {
         public Buffer buffer;
         public Rect area;
-        public final Listener bufferDestroyListener = new Listener() {
-            public void onNotify()
+        public final DestroyListener bufferDestroyListener = new DestroyListener() {
+            public void onDestroy()
             {
                 buffer = null;
-                detach();
             }
         };
         public Region damage = null;
@@ -157,6 +156,8 @@ public class Surface implements wl_surface.Requests
             // FIXME: Handle the resize correctly. Right now, no translations
             // are being applied.
             current.buffer = pending.buffer;
+            if (pending.buffer != null)
+                pending.bufferDestroyListener.detach();
 
             if (current.buffer != null) {
                 current.buffer.incrementReferenceCount();
