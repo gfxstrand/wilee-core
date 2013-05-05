@@ -22,6 +22,7 @@
 package net.jlekstrand.wheatley;
 
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.Client;
@@ -33,6 +34,78 @@ import org.freedesktop.wayland.protocol.wl_surface;
 
 class TilingShell extends Global implements Shell
 {
+    private static class SurfaceIterator implements ListIterator<Surface>
+    {
+        private ListIterator<ShellSurface> iter;
+
+        public SurfaceIterator(ListIterator<ShellSurface> iter)
+        {
+            this.iter = iter;
+        }
+
+        @Override
+        public void add(Surface s)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+            return iter.hasNext();
+        }
+
+        @Override
+        public boolean hasPrevious()
+        {
+            return iter.hasPrevious();
+        }
+
+        @Override
+        public Surface next()
+        {
+            ShellSurface s = iter.next();
+            if (s != null)
+                return s.surface;
+            else
+                return null;
+        }
+
+        @Override
+        public int nextIndex()
+        {
+            return iter.nextIndex();
+        }
+
+        @Override
+        public Surface previous()
+        {
+            ShellSurface s = iter.previous();
+            if (s != null)
+                return s.surface;
+            else
+                return null;
+        }
+
+        @Override
+        public int previousIndex()
+        {
+            return iter.previousIndex();
+        }
+
+        @Override
+        public void remove()
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void set(Surface s)
+        {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     private static final String LOG_PREFIX = "TilingShell";
 
     private LinkedList<ShellSurface> surfaces;
@@ -44,17 +117,10 @@ class TilingShell extends Global implements Shell
         surfaces = new LinkedList<ShellSurface>();
     }
 
-    public void render(Renderer renderer)
+    @Override
+    public ListIterator<Surface> getVisibleSurfaces()
     {
-        renderer.beginRender(true);
-
-        for (ShellSurface ssurface : surfaces)
-            renderer.drawSurface(ssurface.surface);
-
-        int serial = renderer.endRender();
-
-        for (ShellSurface ssurface : surfaces)
-            ssurface.surface.notifyFrameCallbacks(serial);
+        return new SurfaceIterator(surfaces.listIterator());
     }
 
     @Override

@@ -23,6 +23,7 @@ package net.jlekstrand.wheatley;
 
 import java.lang.Runnable;
 import java.lang.Thread;
+import java.util.ListIterator;
 import java.io.File;
 
 import org.freedesktop.wayland.server.EventLoop;
@@ -106,6 +107,29 @@ public class Compositor extends Global implements wl_compositor.Requests
         }
     }
 
+    private void doRender()
+    {
+        if (renderer == null)
+            return;
+
+        final ListIterator<Surface> iter = shell.getVisibleSurfaces();
+
+        while (iter.hasNext())
+            iter.next();
+
+        renderer.beginRender(true);
+
+        while (iter.hasPrevious())
+            renderer.drawSurface(iter.previous());
+
+        final int serial = renderer.endRender();
+
+        while (iter.hasNext())
+            iter.next().notifyFrameCallbacks(serial);
+
+        display.flushClients();
+    }
+
     private void requestRender()
     {
         if (render_pending)
@@ -116,11 +140,9 @@ public class Compositor extends Global implements wl_compositor.Requests
             @Override
             public void handleIdle()
             {
-                if (renderer != null && render_pending) {
-                    shell.render(renderer);
-                }
+                if (render_pending)
+                    doRender();
                 render_pending = false;
-                display.flushClients();
             }
         });
     }
