@@ -32,7 +32,7 @@ import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.protocol.wl_shell;
 import org.freedesktop.wayland.protocol.wl_surface;
 
-class TilingShell extends Global implements Shell
+class DesktopShell extends Global implements Shell
 {
     private static class SurfaceIterator implements ListIterator<Surface>
     {
@@ -106,11 +106,11 @@ class TilingShell extends Global implements Shell
         }
     }
 
-    private static final String LOG_PREFIX = "TilingShell";
+    private static final String LOG_PREFIX = "DesktopShell";
 
     private LinkedList<ShellSurface> surfaces;
 
-    public TilingShell()
+    public DesktopShell()
     {
         super(wl_shell.WAYLAND_INTERFACE);
 

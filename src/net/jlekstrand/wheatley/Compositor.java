@@ -71,7 +71,7 @@ public class Compositor extends Global implements wl_compositor.Requests
         shm = new Shm();
         display.addGlobal(shm);
 
-        TilingShell tshell = new TilingShell();
+        DesktopShell tshell = new DesktopShell();
         display.addGlobal(tshell);
         shell = tshell;
     }
