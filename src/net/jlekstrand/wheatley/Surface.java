@@ -28,6 +28,7 @@ import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.protocol.wl_surface;
 import org.freedesktop.wayland.protocol.wl_region;
 import org.freedesktop.wayland.protocol.wl_buffer;
+import org.freedesktop.wayland.protocol.wl_output;
 
 import java.util.ArrayList;
 
@@ -38,16 +39,18 @@ public class Surface implements wl_surface.Requests
     private static class State
     {
         public Buffer buffer;
-        public Rect area;
+        public int bufferTransform;
         public final DestroyListener bufferDestroyListener = new DestroyListener() {
             public void onDestroy()
             {
                 buffer = null;
             }
         };
-        public Region damage = null;
 
+        public Region damage = null;
         public Region inputRegion;
+
+        public Matrix3 transform;
 
         public final ArrayList<Callback> callbacks = new ArrayList<Callback>();
     }
@@ -71,6 +74,8 @@ public class Surface implements wl_surface.Requests
 
         current = new State();
         current.damage = new Region();
+        current.transform = Matrix3.identity();
+
         pending = new State();
     }
 
@@ -87,9 +92,56 @@ public class Surface implements wl_surface.Requests
         return current.buffer;
     }
 
+    public int getWidth()
+    {
+        if (current.buffer == null)
+            return 0;
+
+        switch (current.bufferTransform) {
+        case wl_output.TRANSFORM_90:
+        case wl_output.TRANSFORM_270:
+        case wl_output.TRANSFORM_FLIPPED_90:
+        case wl_output.TRANSFORM_FLIPPED_270:
+            return current.buffer.getHeight();
+        default:
+            return current.buffer.getWidth();
+        }
+    }
+
+    public int getHeight()
+    {
+        if (current.buffer == null)
+            return 0;
+
+        switch (current.bufferTransform) {
+        case wl_output.TRANSFORM_90:
+        case wl_output.TRANSFORM_270:
+        case wl_output.TRANSFORM_FLIPPED_90:
+        case wl_output.TRANSFORM_FLIPPED_270:
+            return current.buffer.getWidth();
+        default:
+            return current.buffer.getHeight();
+        }
+    }
+
     public Region getDamage()
     {
         return current.damage;
+    }
+
+    public int getBufferTransform()
+    {
+        return current.bufferTransform;
+    }
+
+    public Matrix3 getTransform()
+    {
+        return current.transform;
+    }
+
+    public void setTransform(Matrix3 transform)
+    {
+        current.transform = transform;
     }
 
     @Override
@@ -104,21 +156,24 @@ public class Surface implements wl_surface.Requests
         if (pending.buffer != null)
             pending.bufferDestroyListener.detach();
 
-        pending.buffer = (Buffer)buffer.getData();
-        pending.buffer.resource.addDestroyListener(pending.bufferDestroyListener);
+        if (buffer != null) {
+            pending.buffer = (Buffer)buffer.getData();
+            resource.addDestroyListener(pending.bufferDestroyListener);
+        } else {
+            pending.buffer = null;
+        }
 
-        pending.area = new Rect(x, y,
-                x + pending.buffer.getWidth(), y + pending.buffer.getHeight());
+        pending.transform = Matrix3.translate(x, y);
     }
 
     @Override
 	public void damage(wl_surface.Resource resource, int x, int y, int width, int height)
     {
         Rect r = new Rect(x, y, x + width, y + height);
-        if (pending.damage == null)
-            pending.damage = new Region(r);
-        else
+        if (pending.damage != null)
             pending.damage = pending.damage.add(r);
+        else
+            pending.damage = new Region(r);
     }
 
     @Override
@@ -131,6 +186,7 @@ public class Surface implements wl_surface.Requests
     @Override
 	public void setOpaqueRegion(wl_surface.Resource resource, Resource region)
     {
+        return;
     }
 
     @Override
@@ -156,8 +212,6 @@ public class Surface implements wl_surface.Requests
             // FIXME: Handle the resize correctly. Right now, no translations
             // are being applied.
             current.buffer = pending.buffer;
-            if (pending.buffer != null)
-                pending.bufferDestroyListener.detach();
 
             if (current.buffer != null) {
                 current.buffer.incrementReferenceCount();
@@ -165,6 +219,7 @@ public class Surface implements wl_surface.Requests
                         current.bufferDestroyListener);
             }
         }
+        current.bufferTransform = pending.bufferTransform;
 
         if (pending.damage != null) {
             current.damage.add(pending.damage);
@@ -174,19 +229,19 @@ public class Surface implements wl_surface.Requests
         if (pending.inputRegion!= null)
             current.inputRegion = pending.inputRegion;
 
+        if (pending.transform != null)
+            current.transform = current.transform.mult(pending.transform);
+
         current.callbacks.addAll(pending.callbacks);
 
+        pending.bufferDestroyListener.detach();
         pending = new State();
-
-        // FIXME: This should not be needed anymore, but my simple-shm build
-        // still needs it
-        attach(null, current.buffer.resource, 0, 0);
     }
 
     @Override
 	public void setBufferTransform(wl_surface.Resource resource, int transform)
     {
-        return;
+        pending.bufferTransform = transform;
     }
 
     @Override
