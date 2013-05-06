@@ -49,5 +49,11 @@ public class Pointer implements wl_pointer.Requests
 
     public void handleMotion(int time, Fixed x, Fixed y)
     { }
+
+    public void handleButton(int seat, int time, int button, int state)
+    { }
+
+    public void handleAxis(int time, int axis, Fixed value)
+    { }
 }
 
