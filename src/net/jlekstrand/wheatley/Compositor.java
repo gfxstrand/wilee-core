@@ -21,6 +21,8 @@
  */
 package net.jlekstrand.wheatley;
 
+import net.jlekstrand.wheatley.graphics.Region;
+
 import java.lang.Runnable;
 import java.lang.Thread;
 import java.util.ListIterator;

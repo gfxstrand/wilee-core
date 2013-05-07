@@ -19,7 +19,7 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-package net.jlekstrand.wheatley;
+package net.jlekstrand.wheatley.graphics;
 
 final class PixmanRegion
 {

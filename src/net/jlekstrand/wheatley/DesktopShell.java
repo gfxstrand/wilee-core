@@ -21,6 +21,8 @@
  */
 package net.jlekstrand.wheatley;
 
+import net.jlekstrand.wheatley.graphics.*;
+
 import java.util.LinkedList;
 import java.util.ListIterator;
 

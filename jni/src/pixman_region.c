@@ -65,7 +65,8 @@ convert_rect(JNIEnv *env, jclass rect, pixman_box16_t *box)
 }
 
 JNIEXPORT jlong JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_create(JNIEnv *env, jclass clazz)
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_create(JNIEnv *env,
+        jclass clazz)
 {
     pixman_region16_t *region;
 
@@ -80,7 +81,7 @@ Java_net_jlekstrand_wheatley_PixmanRegion_create(JNIEnv *env, jclass clazz)
 }
 
 JNIEXPORT jlong JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_create_1rect(JNIEnv *env,
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_create_1rect(JNIEnv *env,
         jclass clazz, jint x, jint y, jint width, jint height)
 {
     pixman_region16_t *region;
@@ -96,8 +97,8 @@ Java_net_jlekstrand_wheatley_PixmanRegion_create_1rect(JNIEnv *env,
 }
 
 JNIEXPORT jlong JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_clone(JNIEnv *env, jclass clazz,
-        jlong reg)
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_clone(JNIEnv *env,
+        jclass clazz, jlong reg)
 {
     pixman_region16_t *region;
 
@@ -117,8 +118,8 @@ Java_net_jlekstrand_wheatley_PixmanRegion_clone(JNIEnv *env, jclass clazz,
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_destroy(JNIEnv *env, jclass clazz,
-        jlong reg)
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_destroy(JNIEnv *env,
+        jclass clazz, jlong reg)
 {
     pixman_region16_t *region = (pixman_region16_t *)(intptr_t)reg;
 
@@ -127,15 +128,15 @@ Java_net_jlekstrand_wheatley_PixmanRegion_destroy(JNIEnv *env, jclass clazz,
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_translate(JNIEnv *env, jclass clazz,
-        jlong ptr, jint x, jint y)
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_translate(JNIEnv *env,
+        jclass clazz, jlong ptr, jint x, jint y)
 {
     pixman_region_translate((pixman_region16_t *)(intptr_t)ptr, x, y);
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_copy(JNIEnv *env, jclass clazz,
-        jlong dest, jlong src)
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_copy(JNIEnv *env,
+        jclass clazz, jlong dest, jlong src)
 {
     if (! pixman_region_copy((pixman_region16_t *)(intptr_t)dest,
             (pixman_region16_t *)(intptr_t)src))
@@ -143,8 +144,8 @@ Java_net_jlekstrand_wheatley_PixmanRegion_copy(JNIEnv *env, jclass clazz,
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_intersect(JNIEnv *env, jclass clazz,
-        jlong new_reg, jlong reg1, jlong reg2)
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_intersect(JNIEnv *env,
+        jclass clazz, jlong new_reg, jlong reg1, jlong reg2)
 {
     if (! pixman_region_intersect((pixman_region16_t *)(intptr_t)new_reg,
             (pixman_region16_t *)(intptr_t)reg1,
@@ -153,8 +154,8 @@ Java_net_jlekstrand_wheatley_PixmanRegion_intersect(JNIEnv *env, jclass clazz,
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_union(JNIEnv *env, jclass clazz,
-        jlong new_reg, jlong reg1, jlong reg2)
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_union(JNIEnv *env,
+        jclass clazz, jlong new_reg, jlong reg1, jlong reg2)
 {
     if (! pixman_region_union((pixman_region16_t *)(intptr_t)new_reg,
             (pixman_region16_t *)(intptr_t)reg1,
@@ -163,7 +164,7 @@ Java_net_jlekstrand_wheatley_PixmanRegion_union(JNIEnv *env, jclass clazz,
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_union_1rect(JNIEnv *env, jclass clazz,
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_union_1rect(JNIEnv *env, jclass clazz,
         jlong dest, jlong source, jint x, jint y, jint width, jint height)
 {
     if (! pixman_region_union_rect((pixman_region16_t *)(intptr_t)dest,
@@ -172,7 +173,7 @@ Java_net_jlekstrand_wheatley_PixmanRegion_union_1rect(JNIEnv *env, jclass clazz,
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_intersect_1rect(JNIEnv *env,
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_intersect_1rect(JNIEnv *env,
         jclass clazz, jlong dest, jlong source, jint x, jint y,
         jint width, jint height)
 {
@@ -182,8 +183,8 @@ Java_net_jlekstrand_wheatley_PixmanRegion_intersect_1rect(JNIEnv *env,
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_subtract(JNIEnv *env, jclass clazz,
-        jlong reg_d, jlong reg_m, jlong reg_s)
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_subtract(JNIEnv *env,
+        jclass clazz, jlong reg_d, jlong reg_m, jlong reg_s)
 {
     if (! pixman_region_subtract((pixman_region16_t *)(intptr_t)reg_d,
             (pixman_region16_t *)(intptr_t)reg_m,
@@ -191,8 +192,9 @@ Java_net_jlekstrand_wheatley_PixmanRegion_subtract(JNIEnv *env, jclass clazz,
         handle_error(env, (pixman_region16_t *)(intptr_t)reg_d); }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_inverse(JNIEnv *env, jclass clazz,
-        jlong new_reg, jlong reg1, jint x1, jint y1, jint x2, jint y2)
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_inverse(JNIEnv *env,
+        jclass clazz, jlong new_reg, jlong reg1, jint x1, jint y1,
+        jint x2, jint y2)
 {
     pixman_box16_t inv_rect = { x1, y1, x2, y2 };
 
@@ -202,7 +204,7 @@ Java_net_jlekstrand_wheatley_PixmanRegion_inverse(JNIEnv *env, jclass clazz,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_contains_1point(JNIEnv *env,
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_contains_1point(JNIEnv *env,
         jclass clazz, jlong reg, jint x, jint y)
 {
     return pixman_region_contains_point((pixman_region16_t *)(intptr_t)reg,
@@ -210,15 +212,15 @@ Java_net_jlekstrand_wheatley_PixmanRegion_contains_1point(JNIEnv *env,
 }
 
 JNIEXPORT jint JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_n_1rects(JNIEnv *env, jclass clazz,
-        jlong reg)
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_n_1rects(JNIEnv *env,
+        jclass clazz, jlong reg)
 {
     return pixman_region_n_rects((pixman_region16_t *)(intptr_t)reg);
 }
 
 JNIEXPORT jobject JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_get_1rect(JNIEnv *env, jclass clazz,
-        jlong region, jint idx)
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_get_1rect(JNIEnv *env,
+        jclass clazz, jlong region, jint idx)
 {
     pixman_box16_t *rects;
     int n_rects;
@@ -235,15 +237,15 @@ Java_net_jlekstrand_wheatley_PixmanRegion_get_1rect(JNIEnv *env, jclass clazz,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_equal(JNIEnv *env, jclass clazz,
-        jlong reg1, jlong reg2)
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_equal(JNIEnv *env,
+        jclass clazz, jlong reg1, jlong reg2)
 {
     return pixman_region_equal((pixman_region16_t *)(intptr_t)reg1,
             (pixman_region16_t *)(intptr_t)reg2);
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_PixmanRegion_initializeJNI(JNIEnv *env,
+Java_net_jlekstrand_wheatley_graphics_PixmanRegion_initializeJNI(JNIEnv *env,
         jclass clazz)
 {
     jclass cls;

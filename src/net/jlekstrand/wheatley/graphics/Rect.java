@@ -19,50 +19,21 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-package net.jlekstrand.wheatley;
+package net.jlekstrand.wheatley.graphics;
 
-import net.jlekstrand.wheatley.graphics.Rect;
-import net.jlekstrand.wheatley.graphics.Region;
-
-import org.freedesktop.wayland.server.Client;
-
-import org.freedesktop.wayland.protocol.wl_region;
-
-class ClientRegion implements wl_region.Requests
+public final class Rect
 {
-    public final wl_region.Resource resource;
-    Region region;
+    public final int left;
+    public final int top;
+    public final int right;
+    public final int bottom;
 
-    public ClientRegion(Client client, int id)
+    public Rect(int left, int top, int right, int bottom)
     {
-        resource = new wl_region.Resource(client, id, this);
-        region = new Region();
-    }
-
-    public Region
-    getRegion()
-    {
-        return region;
-    }
-
-    @Override
-	public void destroy(wl_region.Resource resource)
-    {
-        resource.destroy();
-    }
-
-    @Override
-	public void add(wl_region.Resource resource, int x, int y, int width,
-            int height)
-    {
-        region = region.add(new Rect(x, y, x + width, y + height));
-    }
-
-    @Override
-	public void subtract(wl_region.Resource resource, int x, int y, int width,
-            int height)
-    {
-        region = region.subtract(new Rect(x, y, x + width, y + height));
+        this.left = left;
+        this.top = top;
+        this.right = right;
+        this.bottom = bottom;
     }
 }
 

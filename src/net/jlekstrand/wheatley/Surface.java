@@ -21,6 +21,8 @@
  */
 package net.jlekstrand.wheatley;
 
+import net.jlekstrand.wheatley.graphics.*;
+
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.server.DestroyListener;

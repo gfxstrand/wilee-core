@@ -19,14 +19,14 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-package net.jlekstrand.wheatley;
+package net.jlekstrand.wheatley.graphics;
 
 import java.nio.FloatBuffer;
 
-public class Matrix4
+public final class Matrix4
 {
-    /* matrix data.  storred in column-major order */
-    private final float[] data;
+    /** Matrix data; storred in column-major order. */
+    final float[] data;
 
     private Matrix4(float[] data)
     {

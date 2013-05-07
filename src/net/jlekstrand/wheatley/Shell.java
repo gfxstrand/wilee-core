@@ -21,6 +21,8 @@
  */
 package net.jlekstrand.wheatley;
 
+import net.jlekstrand.wheatley.graphics.Region;
+
 import java.util.ListIterator;
 
 import org.freedesktop.wayland.server.Global;

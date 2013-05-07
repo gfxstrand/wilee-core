@@ -1,5 +1,4 @@
-/*
- * Copyright © 2012-2013 Jason Ekstrand.
+/* Copyright © 2012-2013 Jason Ekstrand.
  *  
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -19,21 +18,37 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-package net.jlekstrand.wheatley;
+package net.jlekstrand.wheatley.graphics;
 
-public class Rect
+public final class Point
 {
-    public int left;
-    public int top;
-    public int right;
-    public int bottom;
+    final float x;
+    final float y;
 
-    public Rect(int left, int top, int right, int bottom)
+    public Point(float x, float y)
     {
-        this.left = left;
-        this.top = top;
-        this.right = right;
-        this.bottom = bottom;
+        this.x = x;
+        this.y = y;
+    }
+
+    public float getX()
+    {
+        return x;
+    }
+
+    public float getY()
+    {
+        return y;
+    }
+
+    /** Performs a projective transform of the point */
+    public Point transform(Matrix3 matrix)
+    {
+        float x2 = x * matrix.data[0] + y * matrix.data[3] + matrix.data[6];
+        float y2 = x * matrix.data[1] + y * matrix.data[4] + matrix.data[7];
+        float w = x * matrix.data[2] + y * matrix.data[5] + matrix.data[8];
+
+        return new Point(x2 / w, y2 / w);
     }
 }
 
