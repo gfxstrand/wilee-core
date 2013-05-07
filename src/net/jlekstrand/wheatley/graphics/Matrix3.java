@@ -94,6 +94,31 @@ public final class Matrix3
         return out;
     }
 
+    public Matrix3 inverse()
+    {
+        final float out = new float[9];
+
+        out[0] = data[4] * data[8] - data[7] * data[5];
+        out[1] = data[3] * data[8] - data[6] * data[5];
+        out[2] = data[3] * data[7] - data[6] * data[4];
+
+        float det = out[0] - out[1] + out[2];
+        if (det == 0)
+            return null;
+
+        out[3] = data[1] * data[8] - data[7] * data[2];
+        out[4] = data[0] * data[8] - data[6] * data[2];
+        out[5] = data[0] * data[7] - data[6] * data[1];
+        out[6] = data[1] * data[5] - data[4] * data[2];
+        out[7] = data[0] * data[5] - data[3] * data[2];
+        out[8] = data[0] * data[4] - data[3] * data[1];
+
+        for (int i = 0; i < 9; ++i)
+            out[i] = out[i] / det;
+
+        return new Matrix3(out);
+    }
+
     public FloatBuffer asBuffer()
     {
         return FloatBuffer.wrap(data);
