@@ -21,7 +21,7 @@
  */
 package net.jlekstrand.wheatley;
 
-import net.jlekstrand.wheatley.graphics.Region;
+import net.jlekstrand.wheatley.graphics.*;
 
 import java.lang.Runnable;
 import java.lang.Thread;
@@ -172,12 +172,21 @@ public class Compositor extends Global implements wl_compositor.Requests
             requestRender();
     }
 
-    public Surface getSurfaceAt(int x, int y)
+    public Surface findSurfaceAt(Point p)
     {
-        if (shell != null)
-            return myTmpSurface;
-        else
-            return null;
+        final ListIterator<Surface> iter = shell.getVisibleSurfaces();
+
+        while (iter.hasNext()) {
+            Surface surface = iter.next();
+            Matrix3 invTrans = surface.getInverseTransform();
+            if (invTrans == null)
+                continue;
+
+            if (surface.isInInputRegion(p.transform(invTrans)))
+                return surface;
+        }
+
+        return null;
     }
 
     @Override

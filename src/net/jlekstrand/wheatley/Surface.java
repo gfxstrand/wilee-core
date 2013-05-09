@@ -64,8 +64,7 @@ public class Surface implements wl_surface.Requests
     private final State current;
     private State pending;
 
-    // These refer to pending Surface data that will get set on "commit"
-    private Rect pendingBufferRect;
+    private Matrix3 inverseTransform;
 
     public Surface(Client client, int id, Compositor comp)
     {
@@ -141,9 +140,23 @@ public class Surface implements wl_surface.Requests
         return current.transform;
     }
 
+    public Matrix3 getInverseTransform()
+    {
+        if (inverseTransform == null)
+            inverseTransform = current.transform.inverse();
+        return inverseTransform;
+    }
+
     public void setTransform(Matrix3 transform)
     {
         current.transform = transform;
+        inverseTransform = null;
+    }
+
+    public boolean isInInputRegion(Point p)
+    {
+        return current.inputRegion.contains(Math.round(p.getX()),
+                Math.round(p.getY()));
     }
 
     @Override
@@ -232,7 +245,7 @@ public class Surface implements wl_surface.Requests
             current.inputRegion = pending.inputRegion;
 
         if (pending.transform != null)
-            current.transform = current.transform.mult(pending.transform);
+            setTransform(current.transform.mult(pending.transform));
 
         current.callbacks.addAll(pending.callbacks);
 

@@ -21,6 +21,9 @@
  */
 package net.jlekstrand.wheatley;
 
+import net.jlekstrand.wheatley.graphics.Point;
+import net.jlekstrand.wheatley.graphics.Matrix3;
+
 import java.util.HashMap;
 import java.util.ArrayList;
 
@@ -44,24 +47,38 @@ public class TouchHandler
             this.id = id;
         }
 
-        public void handleDown(int serial, int time, Fixed x, Fixed y)
+        public void handleDown(int serial, int time, Point globalPos)
         {
-            surface = seat.compositor.getSurfaceAt(x.asInt(), y.asInt());
+            surface = seat.compositor.findSurfaceAt(globalPos);
             if (surface == null)
+                return;
+
+            Matrix3 invTrans = surface.getInverseTransform();
+            if (invTrans == null)
                 return;
 
             resource = (wl_touch.Resource)resources.getResource(
                     surface.resource.getClient());
 
-            resource.down(serial, time, surface.resource, id, x, y);
+            Point pos = globalPos.transform(surface.getInverseTransform());
+
+            resource.down(serial, time, surface.resource, id,
+                    new Fixed(pos.getX()), new Fixed(pos.getY()));
         }
 
-        public void handleMotion(int time, Fixed x, Fixed y)
+        public void handleMotion(int time, Point globalPos)
         {
             if (resource == null)
                 return;
 
-            resource.motion(time, id, x, y);
+            Matrix3 invTrans = surface.getInverseTransform();
+            if (invTrans == null)
+                return;
+
+            Point pos = globalPos.transform(invTrans);
+
+            resource.motion(time, id, new Fixed(pos.getX()),
+                    new Fixed(pos.getY()));
         }
 
         public void handleUp(int serial, int time)
@@ -89,18 +106,18 @@ public class TouchHandler
         resources.addResource(new wl_touch.Resource(client, id, null));
     }
 
-    public void handleDown(int serial, int time, int id, Fixed x, Fixed y)
+    public void handleDown(int serial, int time, int id, Point pos)
     {
         final Finger finger = new Finger(id);
         fingers.put(id, finger);
-        finger.handleDown(serial, time, x, y);
+        finger.handleDown(serial, time, pos);
     }
 
-    public void handleMotion(int time, int id, Fixed x, Fixed y)
+    public void handleMotion(int time, int id, Point pos)
     {
         final Finger finger = fingers.get(id);
         if (finger != null)
-            finger.handleMotion(time, x, y);
+            finger.handleMotion(time, pos);
     }
 
     public void handleUp(int serial, int time, int id)

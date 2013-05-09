@@ -20,6 +20,9 @@
  */
 package net.jlekstrand.wheatley;
 
+import net.jlekstrand.wheatley.graphics.Point;
+import net.jlekstrand.wheatley.graphics.Matrix3;
+
 import org.freedesktop.wayland.Fixed;
 import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.server.Client;
@@ -47,7 +50,7 @@ public class Pointer implements wl_pointer.Requests
             Resource surface, Fixed hotspot_x, Fixed hotspot_y)
     { }
 
-    public void handleMotion(int time, Fixed x, Fixed y)
+    public void handleMotion(int time, Point pos)
     { }
 
     public void handleButton(int seat, int time, int button, int state)
