@@ -258,7 +258,7 @@ Java_net_jlekstrand_wheatley_graphics_PixmanRegion_initializeJNI(JNIEnv *env,
     if (OutOfMemoryError == NULL)
         return;
 
-    cls = (*env)->FindClass(env, "net/jlekstrand/wheatley/Rect");
+    cls = (*env)->FindClass(env, "net/jlekstrand/wheatley/graphics/Rect");
     if (cls == NULL)
         return;
     Rect.class = (*env)->NewGlobalRef(env, cls);
