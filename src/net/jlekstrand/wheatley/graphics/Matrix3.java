@@ -96,7 +96,7 @@ public final class Matrix3
 
     public Matrix3 inverse()
     {
-        final float out = new float[9];
+        final float[] out = new float[9];
 
         out[0] = data[4] * data[8] - data[7] * data[5];
         out[1] = data[3] * data[8] - data[6] * data[5];
