@@ -114,6 +114,7 @@ public class Pointer implements wl_pointer.Requests
     public void handleButton(int serial, int time, int button, int state)
     {
         if (focusResource != null) {
+            Log.v(LOG_TAG, "Mouse button clicked: " + button);
             focusResource.button(seat.compositor.display.nextSerial(), time,
                     button, state);
         }

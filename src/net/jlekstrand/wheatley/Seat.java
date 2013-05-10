@@ -35,6 +35,8 @@ public class Seat extends Global implements wl_seat.Requests
     public final Keyboard keyboard;
     public final TouchHandler touchHandler;
 
+    private static final String LOG_TAG = "Seat";
+
     private int capabilities;
 
     public Seat(Compositor compositor, int capabilities)
@@ -63,6 +65,7 @@ public class Seat extends Global implements wl_seat.Requests
     @Override
     public void bindClient(Client client, int version, int id)
     {
+        Log.d(LOG_TAG, "Client bound");
         wl_seat.Resource res = new wl_seat.Resource(client, id, this);
         res.capabilities(capabilities);
     }
