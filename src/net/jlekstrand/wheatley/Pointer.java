@@ -25,6 +25,7 @@ import net.jlekstrand.wheatley.graphics.Matrix3;
 
 import org.freedesktop.wayland.Fixed;
 import org.freedesktop.wayland.server.Resource;
+import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.server.Client;
 
 import org.freedesktop.wayland.protocol.wl_pointer;
@@ -33,6 +34,17 @@ public class Pointer implements wl_pointer.Requests
 {
     final Seat seat;
     final ClientResourceMap resources;
+
+    private static final String LOG_TAG = "Pointer";
+    
+    private Surface focus;
+    private wl_pointer.Resource focusResource;
+    private DestroyListener focusDestroyListener = new DestroyListener() {
+        public void onDestroy()
+        {
+            focusResource = null;
+        }
+    };
 
     public Pointer(Seat seat)
     {
@@ -50,13 +62,68 @@ public class Pointer implements wl_pointer.Requests
             Resource surface, Fixed hotspot_x, Fixed hotspot_y)
     { }
 
-    public void handleMotion(int time, Point pos)
-    { }
+    public void setFocus(Surface newFocus, Point globalPos)
+    {
+        if (focus == newFocus)
+            return;
 
-    public void handleButton(int seat, int time, int button, int state)
-    { }
+        Log.d(LOG_TAG, "Pointer focus changed");
+
+        if (focusResource != null) {
+            focusResource.leave(seat.compositor.display.nextSerial(),
+                    focus.resource);
+            focusDestroyListener.detach();
+        }
+
+        if (newFocus != null) {
+            focus = newFocus;
+            focusResource = (wl_pointer.Resource)resources.getResource(
+                    newFocus.resource.getClient());
+
+            if (focusResource != null) {
+                focusResource.addDestroyListener(focusDestroyListener);
+                Point p = focus.fromGlobalCoordinates(globalPos);
+                focusResource.enter(seat.compositor.display.nextSerial(),
+                        focus.resource,
+                        new Fixed(p.getX()), new Fixed(p.getY()));
+            }
+        } else {
+            focus = null;
+            focusResource = null;
+        }
+    }
+
+    public Surface getFocus()
+    {
+        return focus;
+    }
+
+    public void handleMotion(int time, Point pos)
+    {
+        Surface newFocus = seat.compositor.findSurfaceAt(pos);
+        if (focus != newFocus)
+            setFocus(newFocus, pos);
+
+        if (focusResource != null) {
+            Point p = focus.fromGlobalCoordinates(pos);
+            focusResource.motion(time, new Fixed(p.getX()),
+                    new Fixed(p.getY()));
+        }
+    }
+
+    public void handleButton(int serial, int time, int button, int state)
+    {
+        if (focusResource != null) {
+            focusResource.button(seat.compositor.display.nextSerial(), time,
+                    button, state);
+        }
+    }
 
     public void handleAxis(int time, int axis, Fixed value)
-    { }
+    {
+        if (focusResource != null) {
+            focusResource.axis(time, axis, value);
+        }
+    }
 }
 
