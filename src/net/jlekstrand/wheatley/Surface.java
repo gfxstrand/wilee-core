@@ -57,6 +57,8 @@ public class Surface implements wl_surface.Requests
         public final ArrayList<Callback> callbacks = new ArrayList<Callback>();
     }
 
+    private static final String LOG_TAG = "Surface";
+
     private final int id;
     private final Compositor comp;
 
@@ -144,6 +146,10 @@ public class Surface implements wl_surface.Requests
     {
         if (inverseTransform == null)
             inverseTransform = current.transform.inverse();
+
+        if (inverseTransform == null)
+            Log.w(LOG_TAG, "Transformation matrix is singular");
+
         return inverseTransform;
     }
 
@@ -155,8 +161,37 @@ public class Surface implements wl_surface.Requests
 
     public boolean isInInputRegion(Point p)
     {
-        return current.inputRegion.contains(Math.round(p.getX()),
-                Math.round(p.getY()));
+        final int x = Math.round(p.getX());
+        final int y = Math.round(p.getY());
+
+        if (x < 0 || x >= getWidth() || y < 0 || y >= getHeight())
+            return false;
+
+        if (Log.getLevel() <= Log.VERBOSE) {
+            Log.v(LOG_TAG, "Trying point (" + x + ", " + y + ")");
+            Log.v(LOG_TAG, "Surface is " + getWidth() + "x" + getHeight());
+        }
+
+        if (current.inputRegion != null)
+            return current.inputRegion.contains(Math.round(p.getX()),
+                    Math.round(p.getY()));
+
+        return true;
+    }
+
+    public Point fromGlobalCoordinates(Point p)
+    {
+        Matrix3 invTrans = getInverseTransform();
+
+        if (invTrans == null)
+            return new Point(0, 0);
+
+        return p.transform(invTrans);
+    }
+
+    public Point toGloablCoordinates(Point p)
+    {
+        return p.transform(current.transform);
     }
 
     @Override
