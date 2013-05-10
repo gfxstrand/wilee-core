@@ -25,9 +25,19 @@ OF THIS SOFTWARE.
     <property name="build.dir" value="${basedir}/build" />
     <property name="classes.dir" value="${build.dir}/classes" />
     <property name="jni.dir" value="${basedir}/jni" />
+    <property name="tests.source.dir" value="${basedir}/tests" />
+    <property name="tests.classes.dir" value="${build.dir}/tests-classes" />
 
     <path id="wayland.classpath">
         <pathelement path="../wayland-java/wayland-java.jar" />
+    </path>
+
+    <path id="tests.classpath">
+        <pathelement path="${wayland.classpath}" />
+        <pathelement path="${classes.dir}" />
+        <fileset dir="/usr/share/java">
+            <include name="junit.jar" />
+        </fileset>
     </path>
 
     <target name="jni">
@@ -51,6 +61,26 @@ OF THIS SOFTWARE.
 
     <target name="jar" description="Package the library" depends="java,jni">
         <jar destfile="${ant.project.name}.jar" basedir="${classes.dir}"/>
+    </target>
+
+    <target name="tests-java" depends="jar">
+        <mkdir dir="${tests.classes.dir}" />
+        <javac srcdir="${tests.source.dir}" destdir="${tests.classes.dir}"
+                includeantruntime="false">
+            <classpath refid="tests.classpath" />
+        </javac>
+    </target>
+
+    <target name="test" depends="tests-java">
+        <junit fork="yes" >
+            <sysproperty key="java.library.path" value="../build"/>
+            <classpath>
+                <path refid="tests.classpath" />
+                <pathelement path="${tests.classes.dir}" />
+            </classpath>
+            <formatter type="brief" usefile="false" />
+            <test name="net.jlekstrand.wheatley.graphics.Matrix3Test" />
+        </junit>
     </target>
 
     <target name="release" depends="jar" />

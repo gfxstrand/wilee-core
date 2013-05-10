@@ -28,9 +28,22 @@ public final class Matrix3
     /** Matrix data; storred in column-major order. */
     final float[] data;
 
-    private Matrix3(float[] data)
+    Matrix3(float[] data)
     {
         this.data = data;
+    }
+
+    public Matrix3(float[] data, boolean transpose)
+    {
+        if (transpose) {
+            this.data = new float[] {
+                data[0], data[3], data[6],
+                data[1], data[4], data[7],
+                data[2], data[5], data[8]
+            };
+        } else {
+            this.data = java.util.Arrays.copyOf(data, 9);
+        }
     }
 
     public static Matrix3 zeroes()
@@ -99,18 +112,18 @@ public final class Matrix3
         final float[] out = new float[9];
 
         out[0] = data[4] * data[8] - data[7] * data[5];
-        out[1] = data[3] * data[8] - data[6] * data[5];
-        out[2] = data[3] * data[7] - data[6] * data[4];
+        out[1] = - data[1] * data[8] + data[7] * data[2];
+        out[2] = data[1] * data[5] - data[4] * data[2];
 
-        float det = out[0] - out[1] + out[2];
+        float det = data[0] * out[0] + data[3] * out[1] + data[6] * out[2];
         if (det == 0)
             return null;
 
-        out[3] = data[1] * data[8] - data[7] * data[2];
+        out[3] = - data[3] * data[8] + data[6] * data[5];
         out[4] = data[0] * data[8] - data[6] * data[2];
-        out[5] = data[0] * data[7] - data[6] * data[1];
-        out[6] = data[1] * data[5] - data[4] * data[2];
-        out[7] = data[0] * data[5] - data[3] * data[2];
+        out[5] = - data[0] * data[5] + data[3] * data[2];
+        out[6] = data[3] * data[7] - data[6] * data[4];
+        out[7] = - data[0] * data[7] + data[6] * data[1];
         out[8] = data[0] * data[4] - data[3] * data[1];
 
         for (int i = 0; i < 9; ++i)
@@ -119,9 +132,26 @@ public final class Matrix3
         return new Matrix3(out);
     }
 
+    public String toString()
+    {
+        return "[" + data[0] + ", " + data[3] + ", " + data[6] + "\n "
+                + data[1] + ", " + data[4] + ", " + data[7] + "\n "
+                + data[2] + ", " + data[5] + ", " + data[8] + "]";
+    }
+
     public FloatBuffer asBuffer()
     {
         return FloatBuffer.wrap(data);
+    }
+
+    public boolean approxEqual(Matrix3 other)
+    {
+        for (int i = 0; i < 9; ++i) {
+            if (data[i] - other.data[i] < -1e-5
+                    || data[i] - other.data[i] > 1e-5)
+                return false;
+        }
+        return true;
     }
 }
 
