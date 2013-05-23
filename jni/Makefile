@@ -24,7 +24,11 @@ BUILD_DIR ?= ../build
 SRC_DIR ?= src
 OBJECT_DIR := $(BUILD_DIR)/objects
 
-JNI_CFLAGS := -I/lib/jvm/java/include -I/lib/jvm/java/include/linux
+ifeq ($(JAVA_HOME),)
+JAVA_HOME = $(realpath $(dir $(realpath $(shell which javac)))/../ )
+endif
+JNI_CFLAGS := -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+
 PIXMAN_CFLAGS := $(shell pkg-config --cflags pixman-1)
 PIXMAN_LDFLAGS := $(shell pkg-config --libs pixman-1)
 
