@@ -33,10 +33,13 @@ import org.freedesktop.wayland.protocol.wl_pointer;
 public class Pointer implements wl_pointer.Requests
 {
     final Seat seat;
-    final ClientResourceMap resources;
+
+    public static final int BTN_MOUSE = 0x110;
+    private static final int MAX_DRAG_BUTTONS = 5;
 
     private static final String LOG_TAG = "Pointer";
     
+    private Point currentPos;
     private Surface focus;
     private wl_pointer.Resource focusResource;
     private DestroyListener focusDestroyListener = new DestroyListener() {
@@ -45,6 +48,12 @@ public class Pointer implements wl_pointer.Requests
             focusResource = null;
         }
     };
+    private int lastSerial;
+    private int lastButton;
+    private Seat.DragListener dragListener;
+    private int dragButton;
+
+    private final ClientResourceMap resources;
 
     public Pointer(Seat seat)
     {
@@ -75,6 +84,9 @@ public class Pointer implements wl_pointer.Requests
             focusDestroyListener.detach();
         }
 
+        if (dragListener != null)
+            dragListener.setFocus(newFocus, globalPos);
+
         if (newFocus != null) {
             focus = newFocus;
             focusResource = (wl_pointer.Resource)resources.getResource(
@@ -100,6 +112,8 @@ public class Pointer implements wl_pointer.Requests
 
     public void handleMotion(int time, Point pos)
     {
+        this.currentPos = pos;
+
         Surface newFocus = seat.compositor.findSurfaceAt(pos);
         if (focus != newFocus)
             setFocus(newFocus, pos);
@@ -108,16 +122,46 @@ public class Pointer implements wl_pointer.Requests
             Point p = focus.fromGlobalCoordinates(pos);
             focusResource.motion(time, new Fixed(p.getX()),
                     new Fixed(p.getY()));
+
+            if (dragListener != null)
+                dragListener.motion(time, p);
         }
     }
 
     public void handleButton(int serial, int time, int button, int state)
     {
         if (focusResource != null) {
-            Log.v(LOG_TAG, "Mouse button clicked: " + button);
-            focusResource.button(seat.compositor.display.nextSerial(), time,
-                    button, state);
+            if (state == wl_pointer.BUTTON_STATE_PRESSED) {
+                lastSerial = serial;
+                lastButton = button;
+            }
+
+            focusResource.button(serial, time, button, state);
+
+            if (state == wl_pointer.BUTTON_STATE_RELEASED) {
+                if (dragListener != null) {
+                    dragListener.drop();
+                    dragListener = null;
+                }
+            }
         }
+    }
+
+    boolean requestDrag(Seat.DragListener dragListener, Surface surface,
+            int serial)
+    {
+        if (focus != surface)
+            return false;
+
+        if (lastSerial != serial)
+            return false;
+
+        this.dragButton = lastButton;
+        this.dragListener = dragListener;
+
+        dragListener.setFocus(surface, currentPos);
+
+        return true;
     }
 
     public void handleAxis(int time, int axis, Fixed value)

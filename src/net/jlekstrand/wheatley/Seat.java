@@ -21,6 +21,8 @@
  */
 package net.jlekstrand.wheatley;
 
+import net.jlekstrand.wheatley.graphics.Point;
+
 import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.Global;
@@ -34,6 +36,15 @@ public class Seat extends Global implements wl_seat.Requests
     public final Pointer pointer;
     public final Keyboard keyboard;
     public final TouchHandler touchHandler;
+
+    public interface DragListener
+    {
+        public abstract void motion(int time, Point p);
+        public abstract void setFocus(Surface surface, Point p);
+        public abstract void drop();
+    }
+
+    final DataDevice dataDevice;
 
     private static final String LOG_TAG = "Seat";
 
@@ -60,6 +71,8 @@ public class Seat extends Global implements wl_seat.Requests
             touchHandler = new TouchHandler(this);
         else
             touchHandler = null;
+
+        dataDevice = new DataDevice(this);
     }
 
     @Override
@@ -89,6 +102,15 @@ public class Seat extends Global implements wl_seat.Requests
     {
         if (pointer != null)
             pointer.bindClient(resource.getClient(), id);
+    }
+
+    public boolean requestDrag(DragListener dragListener, Surface surface,
+            int serial)
+    {
+        if (pointer != null)
+            return pointer.requestDrag(dragListener, surface, serial);
+
+        return false;
     }
 }
 
