@@ -39,12 +39,13 @@ import org.freedesktop.wayland.protocol.wl_shm;
 
 public class Compositor extends Global implements wl_compositor.Requests
 {
-    private static final String LOG_PREFIX = "Compositor";
+    private static final String LOG_TAG = "Compositor";
 
     public final Display display;
 
     protected Shm shm;
     protected Shell shell;
+    protected DataDeviceManager dataDeviceManager;
     protected Renderer renderer;
 
     private boolean render_pending;
@@ -72,6 +73,8 @@ public class Compositor extends Global implements wl_compositor.Requests
 
         shm = new Shm();
         display.addGlobal(shm);
+        dataDeviceManager = new DataDeviceManager();
+        display.addGlobal(dataDeviceManager);
 
         DesktopShell tshell = new DesktopShell();
         display.addGlobal(tshell);
