@@ -50,7 +50,7 @@ public class TouchHandler
         public void handleDown(int serial, int time, Point globalPos)
         {
             surface = seat.compositor.findSurfaceAt(globalPos);
-            if (surface == null)
+            if (surface == null || surface.getResource() == null)
                 return;
 
             Matrix3 invTrans = surface.getInverseTransform();
@@ -58,11 +58,11 @@ public class TouchHandler
                 return;
 
             resource = (wl_touch.Resource)resources.getResource(
-                    surface.resource.getClient());
+                    surface.getResource().getClient());
 
             Point pos = globalPos.transform(surface.getInverseTransform());
 
-            resource.down(serial, time, surface.resource, id,
+            resource.down(serial, time, surface.getResource(), id,
                     new Fixed(pos.getX()), new Fixed(pos.getY()));
         }
 

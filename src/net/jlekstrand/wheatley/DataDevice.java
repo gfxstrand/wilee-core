@@ -77,8 +77,8 @@ public class DataDevice implements wl_data_device.Requests
             focus = null;
             offer = null;
 
-            if (surface != null) {
-                final Client client = surface.resource.getClient();
+            if (surface != null && surface.getResource() != null) {
+                final Client client = surface.getResource().getClient();
                 deviceResource = resources.get(client);
                 if (deviceResource == null)
                     return;
@@ -90,7 +90,7 @@ public class DataDevice implements wl_data_device.Requests
                     offer.sendOffer();
                 }
                 deviceResource.enter(seat.compositor.display.nextSerial(),
-                        surface.resource,
+                        surface.getResource(),
                         new Fixed(p.getX()), new Fixed(p.getY()),
                         offer.resource);
             }
@@ -144,7 +144,7 @@ public class DataDevice implements wl_data_device.Requests
         Log.d(LOG_TAG, "Starting DragNDrop");
 
         boolean dragStarted = seat.requestDrag(new DragNDropListener(source),
-                (Surface)originSurface.getData(), serial);
+                Surface.fromResource(originSurface), serial);
 
         if (! dragStarted)
             Log.d(LOG_TAG, "Drag attempt failed");

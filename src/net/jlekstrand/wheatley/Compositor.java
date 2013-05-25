@@ -52,9 +52,6 @@ public class Compositor extends Global implements wl_compositor.Requests
     private EventLoopQueuedExecutor jobExecutor;
     private Thread compositorThread;
 
-    // FIXME:
-    private Surface myTmpSurface;
-
     public Compositor()
     {
         super(wl_compositor.WAYLAND_INTERFACE);
@@ -127,10 +124,10 @@ public class Compositor extends Global implements wl_compositor.Requests
         while (iter.hasPrevious())
             renderer.drawSurface(iter.previous());
 
-        final int serial = renderer.endRender();
+        final int timestamp = renderer.endRender();
 
         while (iter.hasNext())
-            iter.next().notifyFrameCallbacks(serial);
+            iter.next().frameDrawn(timestamp);
 
         display.flushClients();
     }
@@ -195,7 +192,7 @@ public class Compositor extends Global implements wl_compositor.Requests
     @Override
     public void createSurface(wl_compositor.Resource resource, int id)
     {
-        myTmpSurface = new Surface(resource.getClient(), id, this);
+        new ClientSurface(resource.getClient(), id, this);
     }
 
     @Override

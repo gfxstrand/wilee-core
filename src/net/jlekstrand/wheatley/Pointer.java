@@ -80,23 +80,23 @@ public class Pointer implements wl_pointer.Requests
 
         if (focusResource != null) {
             focusResource.leave(seat.compositor.display.nextSerial(),
-                    focus.resource);
+                    focus.getResource());
             focusDestroyListener.detach();
         }
 
         if (dragListener != null)
             dragListener.setFocus(newFocus, globalPos);
 
-        if (newFocus != null) {
+        if (newFocus != null && newFocus.getResource() != null) {
             focus = newFocus;
             focusResource = (wl_pointer.Resource)resources.getResource(
-                    newFocus.resource.getClient());
+                    newFocus.getResource().getClient());
 
             if (focusResource != null) {
                 focusResource.addDestroyListener(focusDestroyListener);
                 Point p = focus.fromGlobalCoordinates(globalPos);
                 focusResource.enter(seat.compositor.display.nextSerial(),
-                        focus.resource,
+                        focus.getResource(),
                         new Fixed(p.getX()), new Fixed(p.getY()));
             }
         } else {

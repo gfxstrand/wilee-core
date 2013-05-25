@@ -23,129 +23,192 @@ package net.jlekstrand.wheatley;
 
 import net.jlekstrand.wheatley.graphics.*;
 
-import org.freedesktop.wayland.server.Client;
-import org.freedesktop.wayland.server.Resource;
-import org.freedesktop.wayland.server.DestroyListener;
-
-import org.freedesktop.wayland.protocol.wl_surface;
-import org.freedesktop.wayland.protocol.wl_region;
-import org.freedesktop.wayland.protocol.wl_buffer;
-import org.freedesktop.wayland.protocol.wl_output;
-
 import java.util.ArrayList;
 
-public class Surface implements wl_surface.Requests
-{
-    public final wl_surface.Resource resource;
+import org.freedesktop.wayland.server.DestroyListener;
+import org.freedesktop.wayland.server.Resource;
+import org.freedesktop.wayland.protocol.wl_surface;
+import org.freedesktop.wayland.protocol.wl_output;
 
-    private static class State
+public class Surface
+{
+    private static final String LOG_TAG = "Surface";
+
+    public interface FrameCallback
     {
-        public Buffer buffer;
-        public int bufferTransform;
-        public final DestroyListener bufferDestroyListener = new DestroyListener() {
+        public abstract void onFrameDrawn(int timestamp);
+    }
+
+    private final Compositor compositor;
+    private final ClientSurface clientSurface;
+
+    private Buffer buffer;
+    private int bufferTransform;
+    private final DestroyListener bufferDestroyListener;
+    private Region damage;
+    private Region inputRegion;
+
+    private int posX;
+    private int posY;
+    private Matrix3 transform;
+
+    private Matrix3 inverseTransform;
+
+    private final ArrayList<FrameCallback> frameCallbacks;
+
+    public Surface(Compositor compositor)
+    {
+        this(compositor, null);
+    }
+
+    Surface(Compositor compositor, ClientSurface clientSurface)
+    {
+        this.compositor = compositor;
+        this.clientSurface = clientSurface;
+
+        this.buffer = null;
+        this.bufferTransform = wl_output.TRANSFORM_NORMAL;
+        this.bufferDestroyListener = new DestroyListener() {
             public void onDestroy()
             {
                 buffer = null;
             }
         };
+        this.damage = null;
+        this.inputRegion = null;
 
-        public Region damage = null;
-        public Region inputRegion;
-
-        public Matrix3 transform;
-
-        public final ArrayList<Callback> callbacks = new ArrayList<Callback>();
+        this.posX = 0;
+        this.posY = 0;
+        this.transform = Matrix3.identity();
+        this.inverseTransform = null;
+        
+        this.frameCallbacks = new ArrayList<FrameCallback>();
     }
 
-    private static final String LOG_TAG = "Surface";
-
-    private final int id;
-    private final Compositor comp;
-
-    // These refer to the current Surface data
-    private final State current;
-    private State pending;
-
-    private Matrix3 inverseTransform;
-
-    public Surface(Client client, int id, Compositor comp)
+    public static Surface fromResource(Resource resource)
     {
-        resource = new wl_surface.Resource(client, id, this);
-
-        this.id = id;
-        this.comp = comp;
-
-        current = new State();
-        current.damage = new Region();
-        current.transform = Matrix3.identity();
-
-        pending = new State();
+        return ((ClientSurface)resource.getData()).surface;
     }
 
-    public void notifyFrameCallbacks(int serial)
+    public Resource getResource()
     {
-        for (Callback callback : current.callbacks) {
-            callback.done(serial);
-        }
-        current.callbacks.clear();
+        if (clientSurface != null)
+            return clientSurface.resource;
+        else
+            return null;
     }
 
     public Buffer getBuffer()
     {
-        return current.buffer;
+        return buffer;
     }
 
-    public int getWidth()
+    public void setBuffer(Buffer newBuffer, int x, int y)
     {
-        if (current.buffer == null)
-            return 0;
+        posX += x;
+        posY += y;
 
-        switch (current.bufferTransform) {
-        case wl_output.TRANSFORM_90:
-        case wl_output.TRANSFORM_270:
-        case wl_output.TRANSFORM_FLIPPED_90:
-        case wl_output.TRANSFORM_FLIPPED_270:
-            return current.buffer.getHeight();
-        default:
-            return current.buffer.getWidth();
+        if (buffer == newBuffer)
+            return;
+
+        if (buffer != null) {
+            bufferDestroyListener.detach();
+            buffer.decrementReferenceCount();
         }
-    }
 
-    public int getHeight()
-    {
-        if (current.buffer == null)
-            return 0;
+        buffer = newBuffer;
 
-        switch (current.bufferTransform) {
-        case wl_output.TRANSFORM_90:
-        case wl_output.TRANSFORM_270:
-        case wl_output.TRANSFORM_FLIPPED_90:
-        case wl_output.TRANSFORM_FLIPPED_270:
-            return current.buffer.getWidth();
-        default:
-            return current.buffer.getHeight();
+        if (buffer != null) {
+            buffer.incrementReferenceCount();
+            buffer.resource.addDestroyListener(bufferDestroyListener);
         }
     }
 
     public Region getDamage()
     {
-        return current.damage;
+        return damage;
+    }
+
+    public void addDamage(Region newDamage)
+    {
+        if (damage == null) {
+            damage = newDamage;
+        } else {
+            damage = damage.add(newDamage);
+        }
+        compositor.surfaceDamaged(this, newDamage);
+    }
+
+    public void resetDamage()
+    {
+        damage = null;
+    }
+
+    public int getWidth()
+    {
+        if (buffer == null)
+            return 0;
+
+        switch (bufferTransform) {
+        case wl_output.TRANSFORM_90:
+        case wl_output.TRANSFORM_270:
+        case wl_output.TRANSFORM_FLIPPED_90:
+        case wl_output.TRANSFORM_FLIPPED_270:
+            return buffer.getHeight();
+        default:
+            return buffer.getWidth();
+        }
+    }
+
+    public int getHeight()
+    {
+        if (buffer == null)
+            return 0;
+
+        switch (bufferTransform) {
+        case wl_output.TRANSFORM_90:
+        case wl_output.TRANSFORM_270:
+        case wl_output.TRANSFORM_FLIPPED_90:
+        case wl_output.TRANSFORM_FLIPPED_270:
+            return buffer.getWidth();
+        default:
+            return buffer.getHeight();
+        }
     }
 
     public int getBufferTransform()
     {
-        return current.bufferTransform;
+        return bufferTransform;
+    }
+
+    public void setBufferTransform(int transform)
+    {
+        switch (transform) {
+        case wl_output.TRANSFORM_NORMAL:
+        case wl_output.TRANSFORM_90:
+        case wl_output.TRANSFORM_180:
+        case wl_output.TRANSFORM_270:
+        case wl_output.TRANSFORM_FLIPPED:
+        case wl_output.TRANSFORM_FLIPPED_90:
+        case wl_output.TRANSFORM_FLIPPED_180:
+        case wl_output.TRANSFORM_FLIPPED_270:
+            break;
+        default:
+            throw new IllegalArgumentException("Invalid transform");
+        }
+
+        bufferTransform = transform;
     }
 
     public Matrix3 getTransform()
     {
-        return current.transform;
+        return transform;
     }
 
     public Matrix3 getInverseTransform()
     {
         if (inverseTransform == null)
-            inverseTransform = current.transform.inverse();
+            inverseTransform = transform.inverse();
 
         if (inverseTransform == null)
             Log.w(LOG_TAG, "Transformation matrix is singular");
@@ -155,8 +218,13 @@ public class Surface implements wl_surface.Requests
 
     public void setTransform(Matrix3 transform)
     {
-        current.transform = transform;
+        transform = transform;
         inverseTransform = null;
+    }
+
+    public void setInputRegion(Region reg)
+    {
+        inputRegion = reg;
     }
 
     public boolean isInInputRegion(Point p)
@@ -164,16 +232,16 @@ public class Surface implements wl_surface.Requests
         final int x = Math.round(p.getX());
         final int y = Math.round(p.getY());
 
-        if (x < 0 || x >= getWidth() || y < 0 || y >= getHeight())
-            return false;
-
         if (Log.getLevel() <= Log.VERBOSE) {
             Log.v(LOG_TAG, "Trying point (" + x + ", " + y + ")");
             Log.v(LOG_TAG, "Surface is " + getWidth() + "x" + getHeight());
         }
 
-        if (current.inputRegion != null)
-            return current.inputRegion.contains(Math.round(p.getX()),
+        if (x < 0 || x >= getWidth() || y < 0 || y >= getHeight())
+            return false;
+
+        if (inputRegion != null)
+            return inputRegion.contains(Math.round(p.getX()),
                     Math.round(p.getY()));
 
         return true;
@@ -191,113 +259,20 @@ public class Surface implements wl_surface.Requests
 
     public Point toGloablCoordinates(Point p)
     {
-        return p.transform(current.transform);
+        return p.transform(transform);
     }
 
-    @Override
-	public void destroy(wl_surface.Resource resource)
+    public void addFrameCallback(FrameCallback cb)
     {
-        resource.destroy();
+        frameCallbacks.add(cb);
     }
 
-    @Override
-	public void attach(wl_surface.Resource resource, Resource buffer, int x, int y)
+    public void frameDrawn(int timestamp)
     {
-        if (pending.buffer != null)
-            pending.bufferDestroyListener.detach();
-
-        if (buffer != null) {
-            pending.buffer = (Buffer)buffer.getData();
-            resource.addDestroyListener(pending.bufferDestroyListener);
-        } else {
-            pending.buffer = null;
+        for (FrameCallback cb : frameCallbacks) {
+            cb.onFrameDrawn(timestamp);
         }
-
-        pending.transform = Matrix3.translate(x, y);
-    }
-
-    @Override
-	public void damage(wl_surface.Resource resource, int x, int y, int width, int height)
-    {
-        Rect r = new Rect(x, y, x + width, y + height);
-        if (pending.damage != null)
-            pending.damage = pending.damage.add(r);
-        else
-            pending.damage = new Region(r);
-    }
-
-    @Override
-	public void frame(wl_surface.Resource resource, int callbackID)
-    {
-        Callback callback = new Callback(resource.getClient(), callbackID);
-        pending.callbacks.add(callback);
-    }
-
-    @Override
-	public void setOpaqueRegion(wl_surface.Resource resource, Resource region)
-    {
-        return;
-    }
-
-    @Override
-	public void setInputRegion(wl_surface.Resource resource, Resource region)
-    {
-        if (region != null) {
-            net.jlekstrand.wheatley.ClientRegion cReg =
-                    (net.jlekstrand.wheatley.ClientRegion)region.getData();
-            pending.inputRegion = cReg.getRegion();
-        } else {
-            pending.inputRegion = null;
-        }
-    }
-
-    @Override
-	public void commit(wl_surface.Resource resource)
-    {
-        if (pending.buffer != current.buffer) {
-            if (current.buffer != null) {
-                current.bufferDestroyListener.detach();
-                current.buffer.decrementReferenceCount();
-            }
-            // FIXME: Handle the resize correctly. Right now, no translations
-            // are being applied.
-            current.buffer = pending.buffer;
-
-            if (current.buffer != null) {
-                current.buffer.incrementReferenceCount();
-                current.buffer.resource.addDestroyListener(  
-                        current.bufferDestroyListener);
-            }
-        }
-        current.bufferTransform = pending.bufferTransform;
-
-        if (pending.damage != null) {
-            current.damage.add(pending.damage);
-            comp.surfaceDamaged(this, pending.damage);
-        }
-
-        if (pending.inputRegion!= null)
-            current.inputRegion = pending.inputRegion;
-
-        if (pending.transform != null)
-            setTransform(current.transform.mult(pending.transform));
-
-        current.callbacks.addAll(pending.callbacks);
-
-        pending.bufferDestroyListener.detach();
-        pending = new State();
-    }
-
-    @Override
-	public void setBufferTransform(wl_surface.Resource resource, int transform)
-    {
-        pending.bufferTransform = transform;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return id;
+        frameCallbacks.clear();
     }
 }
 
