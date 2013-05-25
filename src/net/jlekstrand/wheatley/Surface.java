@@ -39,6 +39,11 @@ public class Surface
         public abstract void onFrameDrawn(int timestamp);
     }
 
+    public interface RendererData
+    {
+        public abstract void onSurfaceDestroyed();
+    }
+
     private final Compositor compositor;
     private final ClientSurface clientSurface;
 
@@ -55,6 +60,8 @@ public class Surface
     private Matrix3 inverseTransform;
 
     private final ArrayList<FrameCallback> frameCallbacks;
+
+    private RendererData rendererData;
 
     public Surface(Compositor compositor)
     {
@@ -83,6 +90,8 @@ public class Surface
         this.inverseTransform = null;
         
         this.frameCallbacks = new ArrayList<FrameCallback>();
+
+        this.rendererData = null;
     }
 
     public static Surface fromResource(Resource resource)
@@ -273,6 +282,22 @@ public class Surface
             cb.onFrameDrawn(timestamp);
         }
         frameCallbacks.clear();
+    }
+
+    public void setRendererData(RendererData data)
+    {
+        rendererData = data;
+    }
+
+    public RendererData getRendererData()
+    {
+        return rendererData;
+    }
+
+    public void destroy()
+    {
+        if (rendererData != null)
+            rendererData.onSurfaceDestroyed();
     }
 }
 
