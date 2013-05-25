@@ -25,6 +25,7 @@ OF THIS SOFTWARE.
     <property name="build.dir" value="${basedir}/build" />
     <property name="classes.dir" value="${build.dir}/classes" />
     <property name="jni.dir" value="${basedir}/jni" />
+    <property name="javadoc.dir" value="${basedir}/doc/javadoc" />
     <property name="tests.source.dir" value="${basedir}/tests" />
     <property name="tests.classes.dir" value="${build.dir}/tests-classes" />
 
@@ -53,6 +54,16 @@ OF THIS SOFTWARE.
                 includeantruntime="false">
             <classpath refid="wayland.classpath" />
         </javac>
+    </target>
+
+    <target name="javadoc">
+        <mkdir dir="${javadoc.dir}" />
+        <javadoc sourcepath="${source.dir}" destdir="${javadoc.dir}"
+                access="package">
+            <classpath refid="wayland.classpath" />
+            <package name="net.jlekstrand.wheatley" />
+            <package name="net.jlekstrand.wheatley.graphics" />
+        </javadoc>
     </target>
 
     <target name="clean">
