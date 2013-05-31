@@ -1,3 +1,6 @@
 .*.swp
 /java
 /target
+/.settings
+/.classpath
+/.project
