@@ -1,6 +1,3 @@
 .*.swp
-java
-tests-java
-build
-wheatley-core.jar
-
+/java
+/target
