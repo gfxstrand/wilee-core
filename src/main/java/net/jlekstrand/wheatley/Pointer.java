@@ -68,7 +68,7 @@ public class Pointer implements wl_pointer.Requests
 
     @Override
     public void setCursor(wl_pointer.Resource resource, int serial,
-            Resource surface, Fixed hotspot_x, Fixed hotspot_y)
+            Resource surface, int hotspot_x, int hotspot_y)
     { }
 
     public void setFocus(Surface newFocus, Point globalPos)
