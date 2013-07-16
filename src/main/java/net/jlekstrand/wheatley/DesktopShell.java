@@ -29,6 +29,7 @@ import java.util.ListIterator;
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.Client;
 import org.freedesktop.wayland.server.DestroyListener;
+import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Resource;
 
 import org.freedesktop.wayland.protocol.wl_shell;
@@ -112,9 +113,9 @@ class DesktopShell extends Global implements Shell
 
     private LinkedList<ShellSurface> surfaces;
 
-    public DesktopShell()
+    public DesktopShell(Display display)
     {
-        super(wl_shell.WAYLAND_INTERFACE);
+        super(display, wl_shell.WAYLAND_INTERFACE, 1);
 
         surfaces = new LinkedList<ShellSurface>();
     }
@@ -135,7 +136,8 @@ class DesktopShell extends Global implements Shell
     @Override
     public void bindClient(Client client, int version, int id)
     {
-        client.addObject(wl_shell.WAYLAND_INTERFACE, id, this);
+        wl_shell.Resource res = new wl_shell.Resource(client, 1, id);
+        res.setImplementation(this);
     }
 
     @Override

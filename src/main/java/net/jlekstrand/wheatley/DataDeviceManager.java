@@ -23,6 +23,7 @@ package net.jlekstrand.wheatley;
 
 import org.freedesktop.wayland.server.Global;
 import org.freedesktop.wayland.server.Client;
+import org.freedesktop.wayland.server.Display;
 import org.freedesktop.wayland.server.Resource;
 
 import org.freedesktop.wayland.protocol.wl_data_device_manager;
@@ -32,15 +33,16 @@ import org.freedesktop.wayland.protocol.wl_data_offer;
 public class DataDeviceManager extends Global
         implements wl_data_device_manager.Requests
 {
-    public DataDeviceManager()
+    public DataDeviceManager(Display display)
     {
-        super(wl_data_device_manager.WAYLAND_INTERFACE);
+        super(display, wl_data_device_manager.WAYLAND_INTERFACE, 1);
     }
 
     @Override
     public void bindClient(Client client, int version, int id)
     {
-        client.addObject(wl_data_device_manager.WAYLAND_INTERFACE, id, this);
+        Resource res = new wl_data_device_manager.Resource(client, 1, id);
+        res.setImplementation(this);
     }
 
     @Override

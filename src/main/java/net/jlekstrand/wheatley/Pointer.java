@@ -63,7 +63,9 @@ public class Pointer implements wl_pointer.Requests
 
     public void bindClient(Client client, int id)
     {
-        resources.addResource(new wl_pointer.Resource(client, id, this));
+        wl_pointer.Resource resource = new wl_pointer.Resource(client, 1, id);
+        resource.setImplementation(this);
+        resources.addResource(resource);
     }
 
     @Override

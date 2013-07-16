@@ -32,7 +32,8 @@ class DataOffer implements wl_data_offer.Requests
 
     public DataOffer(Client client, DataSource source)
     {
-        resource = new wl_data_offer.Resource(client, this);
+        resource = new wl_data_offer.Resource(client, 1);
+        resource.setImplementation(this);
         this.source = source;
     }
 

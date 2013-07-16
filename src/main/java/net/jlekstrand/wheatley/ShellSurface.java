@@ -36,7 +36,8 @@ class ShellSurface implements wl_shell_surface.Requests
 
     public ShellSurface(Client client, int id, Surface surface)
     {
-        resource = new wl_shell_surface.Resource(client, id, this);
+        resource = new wl_shell_surface.Resource(client, 1, id);
+        resource.setImplementation(this);
 
         this.surface = surface;
     }

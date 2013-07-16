@@ -35,7 +35,8 @@ class DataSource implements wl_data_source.Requests
 
     public DataSource(Client client, int id)
     {
-        this.resource = new wl_data_source.Resource(client, id, this);
+        this.resource = new wl_data_source.Resource(client, 1, id);
+        this.resource.setImplementation(this);
         this.mime_types = new ArrayList<String>();
     }
 

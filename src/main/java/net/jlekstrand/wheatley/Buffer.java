@@ -35,7 +35,8 @@ public class Buffer implements wl_buffer.Requests
 
     public Buffer(Client client, int id, int width, int height)
     {
-        resource = new wl_buffer.Resource(client, id, this);
+        resource = new wl_buffer.Resource(client, 1, id);
+        resource.setImplementation(this);
 
         this.width = width;
         this.height = height;

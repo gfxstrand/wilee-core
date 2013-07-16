@@ -37,11 +37,12 @@ import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.protocol.wl_compositor;
 import org.freedesktop.wayland.protocol.wl_shm;
 
-public class Compositor extends Global implements wl_compositor.Requests
+public class Compositor implements wl_compositor.Requests
 {
     private static final String LOG_TAG = "Compositor";
 
     public final Display display;
+    private final Global global;
 
     protected Shm shm;
     protected Shell shell;
@@ -54,12 +55,19 @@ public class Compositor extends Global implements wl_compositor.Requests
 
     public Compositor()
     {
-        super(wl_compositor.WAYLAND_INTERFACE);
-
         renderer = null;
 
         display = new Display();
-        display.addGlobal(this);
+        global = new Global(display, wl_compositor.WAYLAND_INTERFACE, 1,
+                new Global.BindHandler()
+        {
+            @Override
+            public void bindClient(Client client, int version, int id)
+            {
+                Resource res = new wl_compositor.Resource(client, version, id);
+                res.setImplementation(Compositor.this);
+            }
+        });
 
         try {
             jobExecutor = new EventLoopQueuedExecutor();
@@ -68,25 +76,14 @@ public class Compositor extends Global implements wl_compositor.Requests
             throw new RuntimeException(e);
         }
 
-        shm = new Shm();
-        display.addGlobal(shm);
-        dataDeviceManager = new DataDeviceManager();
-        display.addGlobal(dataDeviceManager);
-
-        DesktopShell tshell = new DesktopShell();
-        display.addGlobal(tshell);
-        shell = tshell;
+        shm = new Shm(display);
+        new DataDeviceManager(display);
+        shell = new DesktopShell(display);
     }
 
     public Display getDisplay()
     {
         return display;
-    }
-
-    @Override
-    public void bindClient(Client client, int version, int id)
-    {
-        client.addObject(wl_compositor.WAYLAND_INTERFACE, id, this);
     }
 
     public void run()

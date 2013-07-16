@@ -103,7 +103,7 @@ public class TouchHandler
 
     public void bindClient(Client client, int id)
     {
-        resources.addResource(new wl_touch.Resource(client, id, null));
+        resources.addResource(new wl_touch.Resource(client, 1, id));
     }
 
     public void handleDown(int serial, int time, int id, Point pos)

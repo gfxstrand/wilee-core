@@ -122,7 +122,8 @@ public class DataDevice implements wl_data_device.Requests
     void bindClient(final Client client, int id)
     {
         wl_data_device.Resource resource =
-                new wl_data_device.Resource(client, id, this);
+                new wl_data_device.Resource(client, 1, id);
+        resource.setImplementation(this);
         resource.addDestroyListener(new DestroyListener() {
             @Override
             public void onDestroy()

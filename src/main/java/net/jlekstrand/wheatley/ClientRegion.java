@@ -35,7 +35,8 @@ class ClientRegion implements wl_region.Requests
 
     public ClientRegion(Client client, int id)
     {
-        resource = new wl_region.Resource(client, id, this);
+        resource = new wl_region.Resource(client, 1, id);
+        resource.setImplementation(this);
         region = new Region();
     }
 

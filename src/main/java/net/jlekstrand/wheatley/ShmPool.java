@@ -36,7 +36,8 @@ public class ShmPool implements wl_shm_pool.Requests
 
     public ShmPool(Client client, int id, int fd, int size)
     {
-        resource = new wl_shm_pool.Resource(client, id, this);
+        resource = new wl_shm_pool.Resource(client, 1, id);
+        resource.setImplementation(this);
 
         this.refCount = 1;
         try {

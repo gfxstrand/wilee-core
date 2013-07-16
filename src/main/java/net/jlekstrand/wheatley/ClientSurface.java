@@ -55,7 +55,8 @@ public class ClientSurface implements wl_surface.Requests
     
         public Callback(Client client, int id)
         {
-            resource = new wl_callback.Resource(client, id, this);
+            resource = new wl_callback.Resource(client, 1, id);
+            resource.setImplementation(this);
         }
     
         @Override
@@ -70,7 +71,8 @@ public class ClientSurface implements wl_surface.Requests
 
     public ClientSurface(Client client, int id, Compositor compositor)
     {
-        this.resource = new wl_surface.Resource(client, id, this);
+        this.resource = new wl_surface.Resource(client, 1, id);
+        this.resource.setImplementation(this);
         this.surface = new Surface(compositor, this);
 
         this.pendingBuffer = null;

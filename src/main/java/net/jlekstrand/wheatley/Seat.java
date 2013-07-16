@@ -52,7 +52,7 @@ public class Seat extends Global implements wl_seat.Requests
 
     public Seat(Compositor compositor, int capabilities)
     {
-        super(wl_seat.WAYLAND_INTERFACE);
+        super(compositor.display, wl_seat.WAYLAND_INTERFACE, 1);
 
         this.compositor = compositor;
         this.capabilities = capabilities;
@@ -79,7 +79,8 @@ public class Seat extends Global implements wl_seat.Requests
     public void bindClient(Client client, int version, int id)
     {
         Log.d(LOG_TAG, "Client bound");
-        wl_seat.Resource res = new wl_seat.Resource(client, id, this);
+        wl_seat.Resource res = new wl_seat.Resource(client, 1, id);
+        res.setImplementation(this);
         res.capabilities(capabilities);
     }
 

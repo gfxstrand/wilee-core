@@ -30,15 +30,16 @@ import org.freedesktop.wayland.protocol.wl_shm;
 
 class Shm extends Global implements wl_shm.Requests
 {
-    public Shm()
+    public Shm(Display display)
     {
-        super(wl_shm.WAYLAND_INTERFACE);
+        super(display, wl_shm.WAYLAND_INTERFACE, 1);
     }
 
     @Override
     public void bindClient(Client client, int version, int id)
     {
-        wl_shm.Resource res = new wl_shm.Resource(client, id, this);
+        wl_shm.Resource res = new wl_shm.Resource(client, 1, id);
+        res.setImplementation(this);
         publishFormats(res);
     }
 
