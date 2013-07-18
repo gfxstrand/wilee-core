@@ -21,6 +21,8 @@
  */
 package net.jlekstrand.wheatley;
 
+import org.freedesktop.wayland.arch.Native;
+
 import java.io.IOException;
 
 public class POSIX
@@ -47,7 +49,7 @@ public class POSIX
     }
 
     static {
-        System.loadLibrary("wheatley-core");
+        Native.loadLibrary("wheatley-core");
     }
 }
 

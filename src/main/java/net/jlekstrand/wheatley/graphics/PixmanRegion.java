@@ -21,6 +21,8 @@
  */
 package net.jlekstrand.wheatley.graphics;
 
+import org.freedesktop.wayland.arch.Native;
+
 final class PixmanRegion
 {
     static native long create();
@@ -46,8 +48,8 @@ final class PixmanRegion
     private static native void initializeJNI();
 
     static {
-        System.loadLibrary("pixman-1");
-        System.loadLibrary("wheatley-core");
+        Native.loadLibrary("pixman-1");
+        Native.loadLibrary("wheatley-core");
         initializeJNI();
     }
 }

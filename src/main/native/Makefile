@@ -20,9 +20,11 @@
 
 include files.mk
 
-BUILD_DIR ?= ../build
+OUTPUT_DIR := ../resources/
+$(shell mkdir -p $(OUTPUT_DIR))
 SRC_DIR ?= src
-OBJECT_DIR := $(BUILD_DIR)/objects
+OBJECT_DIR := build/objects
+$(shell mkdir -p $(OBJECT_DIR))
 
 ifeq ($(JAVA_HOME),)
 JAVA_HOME = $(realpath $(dir $(realpath $(shell which javac)))/../ )
@@ -38,7 +40,7 @@ LDFLAGS := $(PIXMAN_LDFLAGS)
 CORE_OBJECTS := $(foreach file, $(WHEATLEY_CORE_SRC), \
 		$(patsubst $(SRC_DIR)/%.c, $(OBJECT_DIR)/%.o, $(file)))
 
-all: $(BUILD_DIR)/libwheatley-core.so
+all: $(OUTPUT_DIR)/libwheatley-core.so
 
 $(OBJECT_DIR):
 	mkdir -p $(OBJECT_DIR)
@@ -46,11 +48,12 @@ $(OBJECT_DIR):
 $(OBJECT_DIR)%.o: $(SRC_DIR)/%.c $(OBJECT_DIR)
 	gcc $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/libwheatley-core.so: $(CORE_OBJECTS)
+$(OUTPUT_DIR)/libwheatley-core.so: $(CORE_OBJECTS)
+	mkdir -p $(OUTPUT_DIR)
 	gcc -shared -o $@ $^ $(LDFLAGS)
 
 .PHONY: clean
 clean:
 	rm -rf $(OBJECT_DIR)
-	rm -f $(BUILD_DIR)/libwheatley-core.so
+	rm -f $(OUTPUT_DIR)/libwheatley-core.so
 
