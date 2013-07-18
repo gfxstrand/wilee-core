@@ -48,7 +48,7 @@ final class PixmanRegion
     private static native void initializeJNI();
 
     static {
-        Native.loadLibrary("pixman-1");
+        System.loadLibrary("pixman-1");
         Native.loadLibrary("wheatley-core");
         initializeJNI();
     }
