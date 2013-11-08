@@ -18,7 +18,7 @@
 # TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
 # OF THIS SOFTWARE.
 
-WHEATLEY_CORE_SRC := \
+WILEE_CORE_SRC := \
 	src/jni_util.c \
 	src/pixman_region.c \
 	src/posix.c

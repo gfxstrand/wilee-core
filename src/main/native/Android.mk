@@ -4,8 +4,8 @@ include $(LOCAL_PATH)/files.mk
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE 			:= wheatley-core
-LOCAL_SRC_FILES 		:= $(WHEATLEY_CORE_SRC)
+LOCAL_MODULE 			:= wilee-core
+LOCAL_SRC_FILES 		:= $(WILEE_CORE_SRC)
 LOCAL_STATIC_LIBRARIES := android_native_app_glue
 
 include $(BUILD_SHARED_LIBRARY)

@@ -33,13 +33,13 @@
 
 #ifdef ANDROID
 #   include <android/log.h>
-#   define LOG_DEBUG(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "wheatley-core", __VA_ARGS__))
+#   define LOG_DEBUG(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "wilee-core", __VA_ARGS__))
 #else
 #   define LOG_DEBUG(...)
 #endif
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_POSIX_pipe(JNIEnv * env, jclass clazz,
+Java_net_jlekstrand_wilee_POSIX_pipe(JNIEnv * env, jclass clazz,
         jintArray jpipefd)
 {
     int pipefd[2];
@@ -98,14 +98,14 @@ error:
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_POSIX_close(JNIEnv * env, jclass clazz, int fd)
+Java_net_jlekstrand_wilee_POSIX_close(JNIEnv * env, jclass clazz, int fd)
 {
     if (close(fd) == -1)
         jni_util_throw_by_name(env, "java/io/IOException", strerror(errno));
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_POSIX_read(JNIEnv * env, jclass clazz, int fd,
+Java_net_jlekstrand_wilee_POSIX_read(JNIEnv * env, jclass clazz, int fd,
         jbyteArray jbuff, jlong count)
 {
     ssize_t size;
@@ -134,7 +134,7 @@ Java_net_jlekstrand_wheatley_POSIX_read(JNIEnv * env, jclass clazz, int fd,
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_POSIX_write(JNIEnv * env, jclass clazz, int fd,
+Java_net_jlekstrand_wilee_POSIX_write(JNIEnv * env, jclass clazz, int fd,
         jbyteArray jbuff, jlong count)
 {
     ssize_t size;
@@ -163,7 +163,7 @@ Java_net_jlekstrand_wheatley_POSIX_write(JNIEnv * env, jclass clazz, int fd,
 }
 
 JNIEXPORT void JNICALL
-Java_net_jlekstrand_wheatley_POSIX__1setenv(JNIEnv * env, jclass clazz,
+Java_net_jlekstrand_wilee_POSIX__1setenv(JNIEnv * env, jclass clazz,
         jbyteArray jname, jbyteArray jvalue, jboolean overwrite)
 {
     jsize name_len, value_len;

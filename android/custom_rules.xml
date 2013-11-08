@@ -20,7 +20,7 @@ DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
 OF THIS SOFTWARE.
 -->
-<project name="wheatley-lib-custom" default="help">
+<project name="wilee-lib-custom" default="help">
     <target name="-pre-build">
         <exec executable="ndk-build" failonerror="true">
             <env key="APP_BUILD_SCRIPT" value="../jni/Android.mk" />

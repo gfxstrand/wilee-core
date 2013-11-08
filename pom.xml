@@ -3,7 +3,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>wheatly-core</artifactId>
+    <artifactId>wilee-core</artifactId>
     <groupId>net.jlekstrand</groupId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Wayland Java bindings</name>

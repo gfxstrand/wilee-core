@@ -37,10 +37,10 @@ PIXMAN_LDFLAGS := $(shell pkg-config --libs pixman-1)
 CFLAGS := -g -fPIC $(JNI_CFLAGS) $(PIXMAN_CFLAGS)
 LDFLAGS := $(PIXMAN_LDFLAGS)
 
-CORE_OBJECTS := $(foreach file, $(WHEATLEY_CORE_SRC), \
+CORE_OBJECTS := $(foreach file, $(WILEE_CORE_SRC), \
 		$(patsubst $(SRC_DIR)/%.c, $(OBJECT_DIR)/%.o, $(file)))
 
-all: $(OUTPUT_DIR)/libwheatley-core.so
+all: $(OUTPUT_DIR)/libwilee-core.so
 
 $(OBJECT_DIR):
 	mkdir -p $(OBJECT_DIR)
@@ -48,12 +48,12 @@ $(OBJECT_DIR):
 $(OBJECT_DIR)%.o: $(SRC_DIR)/%.c $(OBJECT_DIR)
 	gcc $(CFLAGS) -c $< -o $@
 
-$(OUTPUT_DIR)/libwheatley-core.so: $(CORE_OBJECTS)
+$(OUTPUT_DIR)/libwilee-core.so: $(CORE_OBJECTS)
 	mkdir -p $(OUTPUT_DIR)
 	gcc -shared -o $@ $^ $(LDFLAGS)
 
 .PHONY: clean
 clean:
 	rm -rf $(OBJECT_DIR)
-	rm -f $(OUTPUT_DIR)/libwheatley-core.so
+	rm -f $(OUTPUT_DIR)/libwilee-core.so
 
