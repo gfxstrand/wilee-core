@@ -32,7 +32,7 @@ import org.freedesktop.wayland.server.DestroyListener;
 import org.freedesktop.wayland.protocol.wl_surface;
 import org.freedesktop.wayland.protocol.wl_callback;
 
-public class ClientSurface implements wl_surface.Requests
+public class ClientSurface implements wl_surface.Requests2
 {
     final wl_surface.Resource resource;
     final Surface surface;
