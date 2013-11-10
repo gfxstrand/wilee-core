@@ -26,9 +26,8 @@ import net.jlekstrand.wilee.graphics.Region;
 import java.util.ListIterator;
 
 import org.freedesktop.wayland.server.Global;
-import org.freedesktop.wayland.protocol.wl_shell;
 
-interface Shell extends wl_shell.Requests
+interface Shell
 {
     public ListIterator<Surface> getVisibleSurfaces();
     public abstract boolean surfaceDamaged(Surface surface, Region damage);

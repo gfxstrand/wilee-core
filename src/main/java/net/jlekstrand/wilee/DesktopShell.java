@@ -35,7 +35,7 @@ import org.freedesktop.wayland.server.Resource;
 import org.freedesktop.wayland.protocol.wl_shell;
 import org.freedesktop.wayland.protocol.wl_surface;
 
-class DesktopShell extends Global implements Shell
+class DesktopShell extends Global implements Shell, wl_shell.Requests
 {
     private static class SurfaceIterator implements ListIterator<Surface>
     {
