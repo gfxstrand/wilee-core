@@ -17,7 +17,23 @@ repositories {
 dependencies {
     compile 'org.freedesktop:wayland:0.0.1-SNAPSHOT'
 
+    protocol 'org.freedesktop:wayland.scanner:0.0.1-SNAPSHOT'
+
     testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+task protocol << {
+    ant.taskdef(
+        name: 'scanner',
+        classpath: configurations.protocol.asPath,
+        classname: 'org.freedesktop.wayland.scanner.Scanner'
+    )
+
+    ant.scanner(
+        src: 'protocol/fullscreen-shell.xml',
+        dest: 'src/main/java',
+        javapackage: 'net.jlekstrand.wilee.protocol'
+    )
 }
 
 task jni(type: Exec) {
@@ -29,5 +45,6 @@ compileJava {
     options.compilerArgs << '-Xlint:deprecation'
 }
 
+compileJava.dependsOn protocol
 jar.dependsOn jni
 
