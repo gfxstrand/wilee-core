@@ -140,7 +140,7 @@ public class DataDevice implements wl_data_device.Requests
     {
         DataSource source = null;
         if (sourceRes != null)
-            source = (DataSource)sourceRes.getData();
+            source = (DataSource)sourceRes.getImplementation();
 
         Log.d(LOG_TAG, "Starting DragNDrop");
 

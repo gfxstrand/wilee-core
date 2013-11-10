@@ -108,7 +108,7 @@ public class ClientSurface implements wl_surface.Requests2
             pendingBufferDestroyListener.detach();
 
         if (buffer != null) {
-            pendingBuffer = (Buffer)buffer.getData();
+            pendingBuffer = (Buffer)buffer.getImplementation();
             buffer.addDestroyListener(pendingBufferDestroyListener);
         } else {
             pendingBuffer = null;
@@ -147,8 +147,7 @@ public class ClientSurface implements wl_surface.Requests2
 	public void setInputRegion(wl_surface.Resource resource, Resource region)
     {
         if (region != null) {
-            net.jlekstrand.wilee.ClientRegion cReg =
-                    (net.jlekstrand.wilee.ClientRegion)region.getData();
+            ClientRegion cReg = (ClientRegion)region.getImplementation();
             pendingInputRegion = cReg.getRegion();
         } else {
             pendingInputRegion = null;

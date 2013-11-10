@@ -145,7 +145,7 @@ class DesktopShell extends Global implements Shell
             Resource surfaceRes)
     {
         final ShellSurface ssurface = new ShellSurface(resource.getClient(),
-                id, ((ClientSurface)surfaceRes.getData()).surface);
+                id, ((ClientSurface)surfaceRes.getImplementation()).surface);
 
         ssurface.surface.setTransform(Matrix3.translate(-100, 0));
 

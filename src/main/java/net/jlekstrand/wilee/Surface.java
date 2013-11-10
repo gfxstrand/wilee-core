@@ -96,7 +96,7 @@ public class Surface
 
     public static Surface fromResource(Resource resource)
     {
-        return ((ClientSurface)resource.getData()).surface;
+        return ((ClientSurface)resource.getImplementation()).surface;
     }
 
     public Resource getResource()

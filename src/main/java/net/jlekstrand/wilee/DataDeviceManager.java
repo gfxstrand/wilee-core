@@ -56,7 +56,7 @@ public class DataDeviceManager extends Global
     public void getDataDevice(wl_data_device_manager.Resource resource,
             int id, Resource seatRes)
     {
-        Seat seat = (Seat)seatRes.getData();
+        Seat seat = (Seat)seatRes.getImplementation();
         seat.dataDevice.bindClient(resource.getClient(), id);
     }
 }
